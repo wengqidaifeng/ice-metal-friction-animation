@@ -6,7 +6,7 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Ice Metal Friction Animation</title>
-<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;max-width:736px;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
+<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
 </head>
 <body>
 <iframe sandbox="allow-scripts" referrerpolicy="no-referrer" title="Ice Metal Friction Animation" srcdoc="&lt;!doctype html&gt;
@@ -19,34 +19,84 @@
 &lt;title&gt;Ice Metal Friction Animation&lt;/title&gt;
 &lt;style&gt;:root {
   color-scheme: light dark;
-  background-color: var(--background) !important;
+  background-color: var(
+    --background,
+    var(--color-background-primary, light-dark(rgb(255 255 255), rgb(24 24 24)))
+  ) !important;
 
   /* Agent-facing contract; keep in sync with SKILL.md. */
-  --background: light-dark(rgb(255 255 255), rgb(24 24 24));
-  --foreground: light-dark(rgb(26 28 31), rgb(255 255 255));
+  --background: var(
+    --color-background-primary,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
   --card: color-mix(in oklab, var(--foreground) 5%, transparent);
-  --card-foreground: var(--foreground);
-  --popover: light-dark(rgb(255 255 255), rgb(45 45 45));
-  --popover-foreground: var(--foreground);
-  --primary: light-dark(rgb(51 156 255), rgb(131 195 255));
-  --primary-foreground: light-dark(rgb(255 255 255), rgb(13 13 13));
-  --secondary: light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%));
-  --secondary-foreground: var(--foreground);
+  --card-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --popover: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255), rgb(45 45 45))
+  );
+  --popover-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --primary: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --primary-foreground: var(
+    --color-text-inverse,
+    light-dark(rgb(255 255 255), rgb(13 13 13))
+  );
+  --secondary: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%))
+  );
+  --secondary-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
   --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
-  --muted-foreground: light-dark(
-    rgb(26 28 31 / 49.4%),
-    rgb(255 255 255 / 49.8%)
+  --muted-foreground: var(
+    --color-text-secondary,
+    light-dark(rgb(26 28 31 / 49.4%), rgb(255 255 255 / 49.8%))
   );
-  --accent: light-dark(rgb(229 242 255), rgb(13 39 63));
-  --accent-foreground: var(--primary);
-  --destructive: light-dark(rgb(226 85 7), rgb(255 133 73));
-  --border: light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%));
-  --input: light-dark(
-    rgb(26 28 31 / 11.8%),
-    color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+  --accent: var(
+    --color-background-info,
+    light-dark(rgb(229 242 255), rgb(13 39 63))
   );
-  --ring: light-dark(rgb(51 156 255), rgb(131 195 255 / 76%));
-  --font-size-base: 14px;
+  --accent-foreground: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --destructive: var(
+    --color-text-warning,
+    light-dark(rgb(226 85 7), rgb(255 133 73))
+  );
+  --border: var(
+    --color-border-secondary,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+  --input: var(
+    --color-border-primary,
+    light-dark(
+      rgb(26 28 31 / 11.8%),
+      color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+    )
+  );
+  --ring: var(
+    --color-ring-primary,
+    light-dark(rgb(51 156 255), rgb(131 195 255 / 76%))
+  );
+  --font-size-base: var(--font-text-md-size, 14px);
+  --red: light-dark(rgb(186 38 35), rgb(250 66 62));
+  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
   --viz-series-1: var(--primary);
   --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
   --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
@@ -70,7 +120,7 @@
   --line-height-normal: calc(var(--font-size-normal) * 1.5);
   --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
   --line-height-small: calc(var(--font-size-small) + 4px);
-  --radius: 12.5px;
+  --radius: var(--border-radius-lg, 12.5px);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -90,9 +140,6 @@
   --viz-accent-bg: var(--accent);
   --viz-font-size: var(--font-size-base);
   --viz-warning: var(--destructive);
-  --color-background-primary: var(--background);
-  --color-text-primary: var(--foreground);
-  --color-border-secondary: var(--border);
 }
 
 :root[data-theme=&quot;light&quot;] {
@@ -108,6 +155,20 @@
 }
 
 html &gt; body {
+  /* Preserve MCP aliases for older inline renderers without creating :root cycles. */
+  --color-background-primary: var(
+    --background,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --color-text-primary: var(
+    --foreground,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --color-border-secondary: var(
+    --border,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+
   margin: 0;
   padding: 5px;
   color: var(--foreground);
@@ -121,7 +182,7 @@ html &gt; body {
 a {
   color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
   cursor: pointer;
-  font-weight: var(--viz-font-weight-medium);
+  font-weight: var(--font-weight-medium, 500);
   text-decoration: none;
   text-underline-offset: 2px;
 }
@@ -813,576 +874,412 @@ svg {
 html&gt;body{padding:0}&lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
-&lt;div id=&quot;ice-friction-detail&quot; role=&quot;region&quot; aria-label=&quot;冰与金属摩擦实验装置三维结构演示&quot;&gt;
+&lt;div id=&quot;ice-maker-friction-3d&quot; role=&quot;region&quot; aria-label=&quot;成品制冰机冰与金属摩擦实验装置三维演示&quot;&gt;
   &lt;style&gt;
-    #ice-friction-detail { position: relative; color: var(--foreground); font-family: system-ui, &quot;Microsoft YaHei&quot;, sans-serif; }
-    #ice-friction-detail .viz-controls { margin-bottom: 8px; }
-    #ice-friction-detail .stage { position: relative; width: 100%; height: 590px; overflow: hidden; border-radius: 10px; background: radial-gradient(circle at 48% 28%, #eef8ff 0%, #cbdce8 55%, #8ba1b1 100%); }
-    #ice-friction-detail canvas { display: block; width: 100%; height: 100%; }
-    #ice-friction-detail .labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-    #ice-friction-detail .part-label { position: absolute; transform: translate(-50%, -50%); padding: 3px 7px; border: 1px solid rgba(33, 58, 76, .28); border-radius: 5px; background: rgba(255,255,255,.90); color: #17344a; font-size: 11px; font-weight: 650; line-height: 1.15; white-space: nowrap; box-shadow: 0 1px 5px rgba(20,42,58,.12); }
-    #ice-friction-detail .part-label::before { content: &quot;&quot;; display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: var(--label-color, #2d7db7); vertical-align: 1px; }
-    #ice-friction-detail .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 7px; color: var(--muted-foreground); font-size: 12px; }
-    #ice-friction-detail .swatch { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 2px; vertical-align: -1px; }
-    #ice-friction-detail .status { margin-top: 6px; color: var(--muted-foreground); font-size: 12px; }
-    @media (max-width: 760px) { #ice-friction-detail .stage { height: 500px; } #ice-friction-detail .part-label { font-size: 10px; } }
+    #ice-maker-friction-3d { position: relative; color: var(--foreground); font-family: system-ui, &quot;Microsoft YaHei&quot;, sans-serif; }
+    #ice-maker-friction-3d .viz-controls { margin-bottom: 8px; }
+    #ice-maker-friction-3d .stage { position: relative; width: 100%; height: 620px; overflow: hidden; border-radius: 10px; background: radial-gradient(circle at 48% 25%, #f5fbff 0%, #cadde9 55%, #829aaa 100%); }
+    #ice-maker-friction-3d canvas { display: block; width: 100%; height: 100%; }
+    #ice-maker-friction-3d .labels { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    #ice-maker-friction-3d .readout { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; }
+    #ice-maker-friction-3d .readout span { padding: 4px 7px; border-radius: 5px; background: rgba(7,25,40,.84); color: #dff8ff; font-size: 11px; font-variant-numeric: tabular-nums; box-shadow: 0 1px 5px rgba(0,0,0,.18); }
+    #ice-maker-friction-3d .part-label { position: absolute; transform: translate(-50%, -50%); padding: 3px 7px; border: 1px solid rgba(33,58,76,.28); border-radius: 5px; background: rgba(255,255,255,.92); color: #17344a; font-size: 11px; font-weight: 500; line-height: 1.15; white-space: nowrap; box-shadow: 0 1px 5px rgba(20,42,58,.14); }
+    #ice-maker-friction-3d .part-label::before { content: &quot;&quot;; display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: var(--label-color, #2d7db7); vertical-align: 1px; }
+    #ice-maker-friction-3d .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 7px; color: var(--muted-foreground); font-size: 12px; }
+    #ice-maker-friction-3d .swatch { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 2px; vertical-align: -1px; }
+    #ice-maker-friction-3d .status { margin-top: 6px; color: var(--muted-foreground); font-size: 12px; }
+    @media (max-width: 760px) { #ice-maker-friction-3d .stage { height: 520px; } #ice-maker-friction-3d .part-label { font-size: 10px; } }
   &lt;/style&gt;
 
   &lt;div class=&quot;viz-controls&quot; aria-label=&quot;三维演示控制&quot;&gt;
-    &lt;button class=&quot;btn btn-primary&quot; id=&quot;ifd-play&quot; type=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;暂停运动&lt;/button&gt;
-    &lt;button class=&quot;btn&quot; id=&quot;ifd-explode&quot; type=&quot;button&quot; aria-pressed=&quot;false&quot;&gt;制冷层爆炸图&lt;/button&gt;
-    &lt;button class=&quot;btn&quot; id=&quot;ifd-cut&quot; type=&quot;button&quot; aria-pressed=&quot;false&quot;&gt;剖开前壁&lt;/button&gt;
-    &lt;button class=&quot;btn&quot; id=&quot;ifd-labels&quot; type=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;隐藏标注&lt;/button&gt;
-    &lt;button class=&quot;btn btn-ghost&quot; id=&quot;ifd-reset&quot; type=&quot;button&quot;&gt;复位视角&lt;/button&gt;
-    &lt;label class=&quot;form-label&quot; for=&quot;ifd-material&quot;&gt;金属试样
-      &lt;select class=&quot;form-select&quot; id=&quot;ifd-material&quot;&gt;
-        &lt;option value=&quot;steel&quot;&gt;钢&lt;/option&gt;
-        &lt;option value=&quot;aluminum&quot;&gt;铝&lt;/option&gt;
-        &lt;option value=&quot;copper&quot;&gt;铜&lt;/option&gt;
-        &lt;option value=&quot;brass&quot;&gt;黄铜&lt;/option&gt;
+    &lt;button class=&quot;btn btn-primary&quot; id=&quot;imf-play&quot; type=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;暂停运动&lt;/button&gt;
+    &lt;button class=&quot;btn&quot; id=&quot;imf-explode&quot; type=&quot;button&quot; aria-pressed=&quot;false&quot;&gt;制冰机爆炸图&lt;/button&gt;
+    &lt;button class=&quot;btn&quot; id=&quot;imf-cutaway&quot; type=&quot;button&quot; aria-pressed=&quot;false&quot;&gt;保温层剖视&lt;/button&gt;
+    &lt;button class=&quot;btn&quot; id=&quot;imf-labels&quot; type=&quot;button&quot; aria-pressed=&quot;true&quot;&gt;隐藏标注&lt;/button&gt;
+    &lt;button class=&quot;btn&quot; id=&quot;imf-reset&quot; type=&quot;button&quot;&gt;复位视角&lt;/button&gt;
+    &lt;label class=&quot;form-label&quot; for=&quot;imf-view&quot;&gt;观察视角
+      &lt;select class=&quot;form-select&quot; id=&quot;imf-view&quot;&gt;
+        &lt;option value=&quot;overall&quot;&gt;整机总览&lt;/option&gt;
+        &lt;option value=&quot;cooling&quot;&gt;成品制冰机&lt;/option&gt;
+        &lt;option value=&quot;mechanics&quot;&gt;牵引测力&lt;/option&gt;
+        &lt;option value=&quot;control&quot;&gt;控制与采集&lt;/option&gt;
       &lt;/select&gt;
     &lt;/label&gt;
-    &lt;label class=&quot;form-label&quot; for=&quot;ifd-explosion&quot;&gt;分解程度 &lt;output id=&quot;ifd-explosion-value&quot;&gt;0%&lt;/output&gt;&lt;/label&gt;
-    &lt;input class=&quot;form-range&quot; id=&quot;ifd-explosion&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;100&quot; value=&quot;0&quot; /&gt;
+    &lt;label class=&quot;form-label&quot; for=&quot;imf-material&quot;&gt;金属试样
+      &lt;select class=&quot;form-select&quot; id=&quot;imf-material&quot;&gt;
+        &lt;option value=&quot;steel&quot;&gt;不锈钢&lt;/option&gt;
+        &lt;option value=&quot;aluminum&quot;&gt;铝合金&lt;/option&gt;
+        &lt;option value=&quot;copper&quot;&gt;铜&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/label&gt;
+    &lt;label class=&quot;form-label&quot; for=&quot;imf-explosion&quot;&gt;分解程度 &lt;output id=&quot;imf-explosion-value&quot;&gt;0%&lt;/output&gt;
+      &lt;input class=&quot;form-range&quot; id=&quot;imf-explosion&quot; type=&quot;range&quot; min=&quot;0&quot; max=&quot;100&quot; value=&quot;0&quot;&gt;
+    &lt;/label&gt;
   &lt;/div&gt;
 
   &lt;div class=&quot;stage&quot;&gt;
-    &lt;canvas id=&quot;ifd-canvas&quot; aria-label=&quot;可旋转的开放式保温槽、冰面、金属滑块、TEC、散热片、风扇和ESP32控制系统三维模型&quot;&gt;&lt;/canvas&gt;
-    &lt;div class=&quot;labels&quot; id=&quot;ifd-label-layer&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+    &lt;canvas id=&quot;imf-canvas&quot; aria-label=&quot;可旋转的100毫米冷板、开放式XPS保温层、冰面、金属滑块、双塔散热器、铜热管、双风扇、温控器和ESP32采集系统三维模型&quot;&gt;&lt;/canvas&gt;
+    &lt;div class=&quot;labels&quot; id=&quot;imf-label-layer&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;readout&quot; aria-label=&quot;模拟运行数据&quot;&gt;
+      &lt;span id=&quot;imf-temp&quot;&gt;冰面 −4.1 °C&lt;/span&gt;
+      &lt;span id=&quot;imf-force&quot;&gt;拉力 3.42 N&lt;/span&gt;
+      &lt;span id=&quot;imf-mu&quot;&gt;μk 0.279&lt;/span&gt;
+      &lt;span id=&quot;imf-stroke&quot;&gt;位移 0 mm&lt;/span&gt;
+      &lt;span id=&quot;imf-state&quot;&gt;制冰机恒温｜ESP32采集&lt;/span&gt;
+    &lt;/div&gt;
   &lt;/div&gt;
-
-  &lt;div class=&quot;legend&quot; aria-label=&quot;材料图例&quot;&gt;
-    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#d7edf5&quot;&gt;&lt;/i&gt;XPS保温槽（顶部开放）&lt;/span&gt;
-    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#b9dff2&quot;&gt;&lt;/i&gt;冰面&lt;/span&gt;
-    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#f7f7f4;border:1px solid #bbb&quot;&gt;&lt;/i&gt;TEC1-12706 × 4&lt;/span&gt;
-    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#aeb8c1&quot;&gt;&lt;/i&gt;铝合金托盘/散热片&lt;/span&gt;
-    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#263746&quot;&gt;&lt;/i&gt;风扇/机械支架&lt;/span&gt;
-    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#1f69ad&quot;&gt;&lt;/i&gt;ESP32与控制模块&lt;/span&gt;
+  &lt;div class=&quot;legend&quot; aria-label=&quot;结构图例&quot;&gt;
+    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#b9e5f6&quot;&gt;&lt;/i&gt;2–5 mm冰层&lt;/span&gt;
+    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#c8d0d6&quot;&gt;&lt;/i&gt;100×100 mm铝冷板&lt;/span&gt;
+    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#b76533&quot;&gt;&lt;/i&gt;铜热管&lt;/span&gt;
+    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#17212a&quot;&gt;&lt;/i&gt;双塔散热器与双风扇&lt;/span&gt;
+    &lt;span&gt;&lt;i class=&quot;swatch&quot; style=&quot;background:#d8edf4&quot;&gt;&lt;/i&gt;XPS半封闭保温层（顶部开放）&lt;/span&gt;
   &lt;/div&gt;
-  &lt;div class=&quot;status&quot; id=&quot;ifd-status&quot;&gt;装配视图｜金属滑块在开放冰面上做水平匀速往复运动&lt;/div&gt;
+  &lt;div class=&quot;status&quot; id=&quot;imf-status&quot;&gt;整机总览｜成品制冰机负责结冰与恒温，ESP32负责牵引、测力和实验数据记录。&lt;/div&gt;
 
   &lt;script type=&quot;importmap&quot;&gt;
-    { &quot;imports&quot;: { &quot;three&quot;: &quot;https://unpkg.com/three@0.161.0/build/three.module.js&quot; } }
+    {&quot;imports&quot;:{&quot;three&quot;:&quot;https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js&quot;,&quot;three/addons/&quot;:&quot;https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/&quot;}}
   &lt;/script&gt;
   &lt;script type=&quot;module&quot;&gt;
-    import * as THREE from &#x27;https://unpkg.com/three@0.161.0/build/three.module.js&#x27;;
-    import { OrbitControls } from &#x27;https://unpkg.com/three@0.161.0/examples/jsm/controls/OrbitControls.js&#x27;;
+    import * as THREE from &#x27;three&#x27;;
+    import { OrbitControls } from &#x27;three/addons/controls/OrbitControls.js&#x27;;
+    import { RoundedBoxGeometry } from &#x27;three/addons/geometries/RoundedBoxGeometry.js&#x27;;
 
-    const root = document.getElementById(&#x27;ice-friction-detail&#x27;);
-    const canvas = document.getElementById(&#x27;ifd-canvas&#x27;);
-    const labelLayer = document.getElementById(&#x27;ifd-label-layer&#x27;);
-    const status = document.getElementById(&#x27;ifd-status&#x27;);
+    const root = document.getElementById(&#x27;ice-maker-friction-3d&#x27;);
+    const canvas = document.getElementById(&#x27;imf-canvas&#x27;);
+    const labelLayer = document.getElementById(&#x27;imf-label-layer&#x27;);
+    const status = document.getElementById(&#x27;imf-status&#x27;);
+    if (!root || !canvas || !labelLayer) throw new Error(&#x27;3D容器初始化失败&#x27;);
+
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xb6cad8, 27, 48);
-
+    scene.fog = new THREE.Fog(0xb8cbd7, 24, 46);
     const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
-    camera.position.set(15.5, 11.5, 16.5);
+    camera.position.set(16.8, 12.2, 17.6);
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
-
+    renderer.toneMappingExposure = 1.08;
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.055;
-    controls.target.set(0.4, 2.45, 0);
-    controls.minDistance = 9;
-    controls.maxDistance = 35;
+    controls.dampingFactor = 0.06;
+    controls.target.set(0.4, 3.6, 0);
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.65;
+    controls.autoRotateSpeed = 0.52;
+    controls.minDistance = 8;
+    controls.maxDistance = 38;
+    controls.maxPolarAngle = Math.PI * 0.49;
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x4b6070, 2.25));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 3.6);
-    keyLight.position.set(9, 16, 11);
+    scene.add(new THREE.HemisphereLight(0xf5fbff, 0x506471, 2.2));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
+    keyLight.position.set(-8, 16, 10);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.set(2048, 2048);
-    keyLight.shadow.camera.left = -16;
-    keyLight.shadow.camera.right = 16;
-    keyLight.shadow.camera.top = 16;
-    keyLight.shadow.camera.bottom = -16;
+    keyLight.shadow.camera.left = -18; keyLight.shadow.camera.right = 18;
+    keyLight.shadow.camera.top = 18; keyLight.shadow.camera.bottom = -18;
     scene.add(keyLight);
-    const rimLight = new THREE.DirectionalLight(0x8ad5ff, 2.0);
-    rimLight.position.set(-10, 8, -9);
-    scene.add(rimLight);
+    const rimLight = new THREE.DirectionalLight(0x8fdcff, 1.3);
+    rimLight.position.set(12, 8, -10); scene.add(rimLight);
 
     const machine = new THREE.Group();
     scene.add(machine);
     const explodeParts = [];
     const fans = [];
-    const airflowArrows = [];
+    const airflow = [];
     const labels = [];
 
-    const makeMat = (color, metalness = 0.05, roughness = 0.48, opacity = 1) =&gt; new THREE.MeshStandardMaterial({
-      color, metalness, roughness, transparent: opacity &lt; 1, opacity, side: THREE.DoubleSide
-    });
-    const materials = {
-      tabletop: makeMat(0x55778c, 0.05, 0.7),
-      black: makeMat(0x17212a, 0.72, 0.3),
-      rubber: makeMat(0x111519, 0.05, 0.92),
-      aluminum: makeMat(0xb8c1c9, 0.82, 0.24),
-      aluminumBright: makeMat(0xdbe2e7, 0.86, 0.18),
-      foam: makeMat(0xd8edf4, 0.02, 0.78),
-      foamEdge: makeMat(0x9fc7d7, 0.02, 0.66),
-      window: makeMat(0x99d8f0, 0.05, 0.16, 0.25),
-      ice: makeMat(0xb9e5f6, 0.05, 0.14, 0.72),
-      frost: makeMat(0xeafaff, 0.0, 0.75, 0.82),
-      ceramic: makeMat(0xf7f7f2, 0.02, 0.32),
-      tecEdge: makeMat(0x67a7c9, 0.05, 0.35),
-      copper: makeMat(0xb76533, 0.78, 0.22),
-      brass: makeMat(0xc7952f, 0.72, 0.24),
-      steel: makeMat(0x8f9aa4, 0.9, 0.2),
-      red: makeMat(0xd63c32, 0.08, 0.38),
-      wireBlack: makeMat(0x12171c, 0.45, 0.5),
-      pcbBlue: makeMat(0x155e9d, 0.1, 0.42),
-      pcbRed: makeMat(0xa91f2b, 0.1, 0.42),
-      pcbGreen: makeMat(0x208b57, 0.1, 0.42),
-      pcbBlack: makeMat(0x161b1f, 0.18, 0.38),
-      relayBlue: makeMat(0x1767ac, 0.08, 0.4),
-      goldPin: makeMat(0xd0a326, 0.72, 0.25),
-      screen: new THREE.MeshStandardMaterial({ color: 0x071928, emissive: 0x20bde8, emissiveIntensity: 0.55, roughness: 0.25 })
+    function textureCanvas(kind) {
+      const c = document.createElement(&#x27;canvas&#x27;); c.width = c.height = 256;
+      const ctx = c.getContext(&#x27;2d&#x27;);
+      if (kind === &#x27;brushed&#x27;) {
+        ctx.fillStyle = &#x27;#cbd3d9&#x27;; ctx.fillRect(0, 0, 256, 256);
+        for (let y = 0; y &lt; 256; y += 2) {
+          const g = 176 + (y * 19 % 58); ctx.fillStyle = `rgba(${g},${g + 4},${g + 7},.24)`; ctx.fillRect(0, y, 256, 1);
+        }
+      } else if (kind === &#x27;foam&#x27;) {
+        ctx.fillStyle = &#x27;#d9eef4&#x27;; ctx.fillRect(0, 0, 256, 256);
+        for (let i = 0; i &lt; 520; i++) {
+          const x = (i * 73) % 256, y = (i * 151) % 256, r = .5 + (i % 4) * .42;
+          ctx.fillStyle = i % 3 ? &#x27;rgba(57,125,150,.17)&#x27; : &#x27;rgba(255,255,255,.42)&#x27;;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        }
+      } else {
+        const g = ctx.createLinearGradient(0, 0, 256, 256);
+        g.addColorStop(0, &#x27;#eefcff&#x27;); g.addColorStop(.45, &#x27;#aaddec&#x27;); g.addColorStop(1, &#x27;#dff7ff&#x27;);
+        ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 256);
+        for (let i = 0; i &lt; 86; i++) {
+          const x = (i * 47) % 256, y = (i * 83) % 256, rx = 7 + (i % 8) * 3, ry = 3 + (i % 5) * 2;
+          ctx.fillStyle = i % 3 ? &#x27;rgba(255,255,255,.28)&#x27; : &#x27;rgba(96,177,208,.16)&#x27;;
+          ctx.beginPath(); ctx.ellipse(x, y, rx, ry, (i % 6) * .3, 0, Math.PI * 2); ctx.fill();
+        }
+        for (let i = 0; i &lt; 34; i++) {
+          ctx.strokeStyle = &#x27;rgba(255,255,255,.28)&#x27;; ctx.lineWidth = 1 + i % 2;
+          ctx.beginPath(); ctx.moveTo((i * 31) % 256, (i * 13) % 256); ctx.lineTo((i * 61) % 256, (i * 43) % 256); ctx.stroke();
+        }
+      }
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 3); t.colorSpace = THREE.SRGBColorSpace; return t;
+    }
+
+    const mat = (color, metalness = .05, roughness = .48, opacity = 1) =&gt; new THREE.MeshStandardMaterial({ color, metalness, roughness, transparent: opacity &lt; 1, opacity, side: THREE.DoubleSide });
+    const M = {
+      tabletop: mat(0x526f82, .05, .72), black: mat(0x151b20, .55, .42), rubber: mat(0x0d1114, .02, .96),
+      aluminum: mat(0xb7c0c7, .82, .25), aluminumBright: mat(0xdce3e8, .88, .17), fin: mat(0xc8d0d6, .78, .26),
+      foam: mat(0xd9eef4, .02, .80), foamEdge: mat(0x9bc8d8, .02, .68), foil: mat(0xd8e2e8, .86, .18),
+      ice: mat(0xb9e5f6, .05, .16, .76), frost: mat(0xf0fcff, 0, .80, .88), water: mat(0x78d3f0, .04, .04, .27),
+      ceramic: mat(0xf8f7f2, .02, .30), tecEdge: mat(0x5e9fc3, .06, .40), copper: mat(0xc07039, .82, .20), brass: mat(0xc99b37, .74, .24),
+      steel: mat(0x929da6, .9, .21), red: mat(0xd63d34, .08, .40), wireBlack: mat(0x101419, .35, .53),
+      pcbBlue: mat(0x155f9e, .10, .42), pcbGreen: mat(0x208b57, .10, .42), pcbBlack: mat(0x171c20, .18, .38),
+      controller: mat(0x22272b, .24, .48), buttonBlue: mat(0x197fc0, .04, .38), orange: mat(0xf47a22, .08, .42), gold: mat(0xd4aa2a, .74, .24),
+      display: new THREE.MeshStandardMaterial({ color: 0x170607, emissive: 0xff2717, emissiveIntensity: 1.7, roughness: .25 })
     };
+    const brushed = textureCanvas(&#x27;brushed&#x27;), foamTex = textureCanvas(&#x27;foam&#x27;), iceTex = textureCanvas(&#x27;ice&#x27;);
+    M.aluminum.map = brushed; M.aluminumBright.map = brushed; M.foam.map = foamTex; M.foam.bumpMap = foamTex; M.foam.bumpScale = .035;
+    M.ice.map = iceTex; M.ice.bumpMap = iceTex; M.ice.bumpScale = .035;
 
     function part(name, position, explode = [0, 0, 0]) {
-      const group = new THREE.Group();
-      group.name = name;
-      group.position.set(...position);
-      group.userData.base = group.position.clone();
-      group.userData.explode = new THREE.Vector3(...explode);
-      machine.add(group);
-      explodeParts.push(group);
-      return group;
+      const g = new THREE.Group(); g.name = name; g.position.set(...position); g.userData.base = g.position.clone(); g.userData.explode = new THREE.Vector3(...explode); machine.add(g); explodeParts.push(g); return g;
     }
-
     function box(parent, size, position, material, options = {}) {
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
-      mesh.position.set(...position);
-      if (options.rotation) mesh.rotation.set(...options.rotation);
-      mesh.castShadow = options.castShadow !== false;
-      mesh.receiveShadow = options.receiveShadow !== false;
-      parent.add(mesh);
-      return mesh;
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material); mesh.position.set(...position); if (options.rotation) mesh.rotation.set(...options.rotation); mesh.castShadow = options.castShadow !== false; mesh.receiveShadow = options.receiveShadow !== false; parent.add(mesh); return mesh;
     }
-
+    function roundedBox(parent, size, position, material, radius=.12, options={}) {
+      const mesh = new THREE.Mesh(new RoundedBoxGeometry(size[0],size[1],size[2],5,radius),material); mesh.position.set(...position); if(options.rotation)mesh.rotation.set(...options.rotation); mesh.castShadow=options.castShadow!==false; mesh.receiveShadow=options.receiveShadow!==false; parent.add(mesh); return mesh;
+    }
     function cylinder(parent, radius, length, position, material, axis = &#x27;y&#x27;, segments = 28) {
-      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, segments), material);
-      mesh.position.set(...position);
-      if (axis === &#x27;x&#x27;) mesh.rotation.z = Math.PI / 2;
-      if (axis === &#x27;z&#x27;) mesh.rotation.x = Math.PI / 2;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      parent.add(mesh);
-      return mesh;
+      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, segments), material); mesh.position.set(...position); if (axis === &#x27;x&#x27;) mesh.rotation.z = Math.PI / 2; if (axis === &#x27;z&#x27;) mesh.rotation.x = Math.PI / 2; mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
     }
-
-    function tube(parent, points, radius, material) {
-      const curve = new THREE.CatmullRomCurve3(points.map(p =&gt; new THREE.Vector3(...p)));
-      const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 30, radius, 10, false), material);
-      mesh.castShadow = true;
-      parent.add(mesh);
-      return mesh;
+    function tube(parent, points, radius, material, closed = false) {
+      const curve = new THREE.CatmullRomCurve3(points.map(p =&gt; new THREE.Vector3(...p)), closed, &#x27;catmullrom&#x27;, .35); const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, radius, 10, closed), material); mesh.castShadow = true; parent.add(mesh); return mesh;
     }
-
     function torus(parent, major, minor, position, material, rotation = [Math.PI / 2, 0, 0]) {
-      const mesh = new THREE.Mesh(new THREE.TorusGeometry(major, minor, 12, 36), material);
-      mesh.position.set(...position);
-      mesh.rotation.set(...rotation);
-      mesh.castShadow = true;
-      parent.add(mesh);
-      return mesh;
+      const mesh = new THREE.Mesh(new THREE.TorusGeometry(major, minor, 12, 44), material); mesh.position.set(...position); mesh.rotation.set(...rotation); mesh.castShadow = true; parent.add(mesh); return mesh;
+    }
+    function bolt(parent, x, y, z, axis = &#x27;y&#x27;) { cylinder(parent, .08, .14, [x, y, z], M.steel, axis, 14); }
+    function textPlate(parent, text, width, height, position, foreground = &#x27;#17344a&#x27;, background = &#x27;#f8fbfd&#x27;) {
+      const c = document.createElement(&#x27;canvas&#x27;); c.width = 640; c.height = 180; const ctx = c.getContext(&#x27;2d&#x27;);
+      ctx.fillStyle = background; ctx.fillRect(0, 0, c.width, c.height); ctx.strokeStyle = &#x27;#6e8392&#x27;; ctx.lineWidth = 8; ctx.strokeRect(4, 4, c.width - 8, c.height - 8);
+      ctx.fillStyle = foreground; ctx.font = &#x27;bold 46px Microsoft YaHei, sans-serif&#x27;; ctx.textAlign = &#x27;center&#x27;; ctx.textBaseline = &#x27;middle&#x27;; ctx.fillText(text, c.width / 2, c.height / 2);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: t, transparent: true, side: THREE.DoubleSide })); mesh.position.set(...position); parent.add(mesh); return mesh;
+    }
+    function makePcb(parent, size, position, material, name) {
+      const board = new THREE.Group(); board.position.set(...position); parent.add(board); box(board, [size[0], .10, size[1]], [0, 0, 0], material);
+      for (const x of [-size[0]/2 + .1, size[0]/2 - .1]) for (const z of [-size[1]/2 + .1, size[1]/2 - .1]) torus(board, .055, .018, [x, .06, z], M.gold);
+      textPlate(board, name, Math.min(size[0] * .78, 1.35), .27, [0, .061, 0]).rotation.x = -Math.PI / 2; return board;
+    }
+    function arrow(origin, direction, length, color) {
+      const a = new THREE.ArrowHelper(new THREE.Vector3(...direction).normalize(), new THREE.Vector3(...origin), length, color, .24, .13); a.line.material.transparent = true; a.line.material.opacity = .62; a.cone.material.transparent = true; a.cone.material.opacity = .78; machine.add(a); airflow.push(a); return a;
     }
 
-    function addBolt(parent, x, y, z, material = materials.steel, axis = &#x27;y&#x27;) {
-      cylinder(parent, 0.105, 0.13, [x, y, z], material, axis, 16);
-      const slot = box(parent, [0.14, 0.025, 0.025], [x, y + (axis === &#x27;y&#x27; ? 0.07 : 0), z], materials.black, { castShadow: false });
-      if (axis !== &#x27;y&#x27;) slot.visible = false;
-    }
-
-    function addTextPlate(parent, text, width, height, position, color = &#x27;#17344a&#x27;, background = &#x27;#f8fbfd&#x27;) {
-      const c = document.createElement(&#x27;canvas&#x27;);
-      c.width = 512; c.height = 160;
-      const ctx = c.getContext(&#x27;2d&#x27;);
-      ctx.fillStyle = background; ctx.fillRect(0, 0, c.width, c.height);
-      ctx.strokeStyle = &#x27;#6f8798&#x27;; ctx.lineWidth = 8; ctx.strokeRect(4, 4, c.width - 8, c.height - 8);
-      ctx.fillStyle = color; ctx.font = &#x27;bold 46px Microsoft YaHei, sans-serif&#x27;; ctx.textAlign = &#x27;center&#x27;; ctx.textBaseline = &#x27;middle&#x27;;
-      ctx.fillText(text, c.width / 2, c.height / 2);
-      const texture = new THREE.CanvasTexture(c); texture.colorSpace = THREE.SRGBColorSpace;
-      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide }));
-      mesh.position.set(...position);
-      parent.add(mesh);
-      return mesh;
-    }
-
-    function makeFan(name, position, explode) {
-      const group = part(name, position, explode);
-      const frame = new THREE.Group();
-      group.add(frame);
-      box(frame, [2.45, 0.20, 0.22], [0, 0, -1.12], materials.black);
-      box(frame, [2.45, 0.20, 0.22], [0, 0, 1.12], materials.black);
-      box(frame, [0.22, 0.20, 2.02], [-1.12, 0, 0], materials.black);
-      box(frame, [0.22, 0.20, 2.02], [1.12, 0, 0], materials.black);
-      for (const x of [-1.02, 1.02]) for (const z of [-1.02, 1.02]) {
-        torus(frame, 0.105, 0.04, [x, 0.11, z], materials.aluminumBright);
+    function makeTower(name, z, explode) {
+      const g = part(name, [0, 3.0, z], explode);
+      box(g, [2.65, .16, 1.64], [0, -.96, 0], M.aluminumBright);
+      for (let y = -.82; y &lt;= .92; y += .105) {
+        box(g, [2.82, .035, 1.75], [0, y, 0], M.fin);
+        box(g, [.08, .065, 1.82], [-1.42, y, 0], M.aluminumBright);
+        box(g, [.08, .065, 1.82], [1.42, y, 0], M.aluminumBright);
       }
-      const rotor = new THREE.Group();
-      rotor.position.y = 0.13;
-      group.add(rotor);
-      cylinder(rotor, 0.29, 0.24, [0, 0, 0], materials.black, &#x27;y&#x27;);
-      for (let i = 0; i &lt; 7; i++) {
-        const angle = i * Math.PI * 2 / 7;
-        const blade = box(rotor, [0.34, 0.09, 0.92], [Math.cos(angle) * 0.52, 0, Math.sin(angle) * 0.52], materials.black);
-        blade.rotation.y = -angle + 0.38;
-        blade.scale.x = 0.55;
+      box(g, [.13, 1.95, 1.58], [0, .03, 0], M.aluminum);
+      for (const x of [-.82, -.28, .28, .82]) {
+        const side=x&lt;0?-1:1;
+        tube(g, [[x,1.64,0],[x+side*.18,1.57,0],[x+side*.42,1.30,0],[x+side*.50,.94,0],[x+side*.34,-.62,0]], .088, M.copper);
       }
-      torus(group, 0.94, 0.055, [0, 0.22, 0], materials.aluminumBright);
-      fans.push(rotor);
-      return group;
+      return g;
     }
 
-    function makeHeatsink(name, z, explode) {
-      const group = part(name, [0, 1.62, z], explode);
-      box(group, [7.8, 0.26, 2.32], [0, 0.72, 0], materials.aluminumBright);
-      box(group, [7.8, 0.12, 2.32], [0, 0.52, 0], materials.aluminum);
-      for (let zi = -1.02; zi &lt;= 1.02; zi += 0.17) {
-        box(group, [7.65, 0.62, 0.055], [0, 0.18, zi], materials.aluminum);
-      }
-      for (const x of [-3.55, 3.55]) for (const zz of [-0.98, 0.98]) addBolt(group, x, 0.88, zz);
-      return group;
+    function makeVerticalFan(name, z, explode) {
+      const g = part(name, [-1.57, 3.0, z], explode);
+      box(g, [.26, 2.20, .20], [0, 0, -1.02], M.black); box(g, [.26, 2.20, .20], [0, 0, 1.02], M.black);
+      box(g, [.26, .20, 1.84], [0, -1.02, 0], M.black); box(g, [.26, .20, 1.84], [0, 1.02, 0], M.black);
+      for (const y of [-.92, .92]) for (const zz of [-.92, .92]) { torus(g, .10, .036, [-.15, y, zz], M.aluminumBright, [0, Math.PI / 2, 0]); cylinder(g,.13,.10,[-.34,y,zz],M.aluminumBright,&#x27;x&#x27;,16); }
+      const rotor = new THREE.Group(); rotor.position.x = -.10; g.add(rotor); cylinder(rotor, .25, .28, [0,0,0], M.black, &#x27;x&#x27;);
+      const shape = new THREE.Shape(); shape.moveTo(.10,.08); shape.bezierCurveTo(.28,.04,.74,.06,.95,.29); shape.bezierCurveTo(.76,.43,.42,.52,.17,.40); shape.bezierCurveTo(.08,.32,.05,.16,.10,.08);
+      const bladeGeo = new THREE.ExtrudeGeometry(shape, { depth:.065, bevelEnabled:true, bevelSize:.018, bevelThickness:.014, bevelSegments:2 }); bladeGeo.rotateY(Math.PI/2);
+      for (let i=0;i&lt;7;i++) { const b = new THREE.Mesh(bladeGeo, M.black); b.rotation.x = i * Math.PI * 2 / 7 + .12; b.position.x = -.03; b.castShadow = true; rotor.add(b); }
+      for (const r of [.30,.50,.70,.90]) torus(g, r, .022, [-.30,0,0], M.aluminumBright, [0,Math.PI/2,0]);
+      tube(g,[[-.32,-.88,-.88],[-.32,0,0],[-.32,.88,.88]],.025,M.aluminumBright);
+      tube(g,[[-.32,-.88,.88],[-.32,0,0],[-.32,.88,-.88]],.025,M.aluminumBright);
+      tube(g,[[-.32,-.94,-.88],[-.46,-.72,-.60],[-.46,.72,-.60],[-.32,.94,-.88]],.025,M.steel);
+      tube(g,[[-.32,-.94,.88],[-.46,-.72,.60],[-.46,.72,.60],[-.32,.94,.88]],.025,M.steel);
+      tube(g,[[.04,-.82,-.90],[-.15,-1.18,-1.16],[-.60,-1.30,-1.28]],.03,M.red);
+      tube(g,[[.04,-.72,-.90],[-.12,-1.08,-1.20],[-.56,-1.18,-1.36]],.03,M.wireBlack);
+      fans.push(rotor); return g;
     }
 
-    function makeTec(x, z, index) {
-      const group = part(`TEC${index}`, [x, 2.55, z], [x * 0.18, -0.18, z * 0.34]);
-      box(group, [1.22, 0.08, 1.22], [0, 0.08, 0], materials.ceramic);
-      box(group, [1.17, 0.15, 1.17], [0, -0.035, 0], materials.tecEdge);
-      box(group, [1.22, 0.08, 1.22], [0, -0.15, 0], materials.ceramic);
-      addTextPlate(group, &#x27;TEC1-12706&#x27;, 1.02, 0.25, [0, 0.126, 0.18], &#x27;#29485b&#x27;, &#x27;#f7f7f3&#x27;).rotation.x = -Math.PI / 2;
-      tube(group, [[0.52, -0.05, 0.22], [0.88, -0.18, 0.45], [1.22, -0.25, 0.58]], 0.035, materials.red);
-      tube(group, [[0.52, -0.05, -0.22], [0.88, -0.18, -0.45], [1.22, -0.25, -0.58]], 0.035, materials.wireBlack);
-      return group;
-    }
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(44, 30), M.tabletop); ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
 
-    function makePcb(parent, size, position, material, nameText) {
-      const board = new THREE.Group(); board.position.set(...position); parent.add(board);
-      box(board, [size[0], 0.10, size[1]], [0, 0, 0], material);
-      for (const x of [-size[0] / 2 + 0.11, size[0] / 2 - 0.11]) for (const z of [-size[1] / 2 + 0.11, size[1] / 2 - 0.11]) torus(board, 0.065, 0.022, [x, 0.06, z], materials.goldPin);
-      addTextPlate(board, nameText, Math.min(size[0] * 0.78, 1.35), 0.28, [0, 0.061, 0]).rotation.x = -Math.PI / 2;
-      return board;
-    }
+    const rack = part(&#x27;四脚架空底座&#x27;, [0,0,0]);
+    for (const x of [-5.6,5.6]) for (const z of [-4.1,4.1]) { box(rack,[.28,1.15,.28],[x,.58,z],M.black); box(rack,[.72,.12,.72],[x,.06,z],M.rubber); }
+    box(rack,[11.5,.22,.24],[0,1.12,-4.1],M.black); box(rack,[11.5,.22,.24],[0,1.12,4.1],M.black); box(rack,[.24,.22,8.2],[-5.6,1.12,0],M.black); box(rack,[.24,.22,8.2],[5.6,1.12,0],M.black);
+    for (let x=-5.2;x&lt;=5.2;x+=.52) box(rack,[.055,.07,7.8],[x,1.16,0],M.black);
+    for (let z=-3.7;z&lt;=3.7;z+=.52) box(rack,[11.0,.07,.055],[0,1.17,z],M.black);
 
-    function airflowArrow(origin, direction, length, color) {
-      const arrow = new THREE.ArrowHelper(new THREE.Vector3(...direction).normalize(), new THREE.Vector3(...origin), length, color, 0.22, 0.12);
-      arrow.line.material.transparent = true;
-      arrow.line.material.opacity = 0.64;
-      arrow.cone.material.transparent = true;
-      arrow.cone.material.opacity = 0.78;
-      machine.add(arrow);
-      airflowArrows.push(arrow);
-      return arrow;
-    }
+    const towerA = makeTower(&#x27;塔式鳍片散热器A&#x27;, 1.02, [0,-1.5,1.1]);
+    const towerB = makeTower(&#x27;塔式鳍片散热器B&#x27;, -1.02, [0,-1.5,-1.1]);
+    const fanA = makeVerticalFan(&#x27;90毫米轴流风扇A&#x27;, 1.02, [-2.3,-.35,1.25]);
+    const fanB = makeVerticalFan(&#x27;90毫米轴流风扇B&#x27;, -1.02, [-2.3,-.35,-1.25]);
+    for (const z of [-1.02,1.02]) { arrow([-2.9,3.0,z],[1,0,0],1.1,0x42b7e8); arrow([1.6,3.0,z],[1,0,0],1.25,0xf28a3b); }
 
-    // Ground and a real black wire-rack base; all four legs touch the tabletop.
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(42, 30), materials.tabletop);
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
-    const rack = part(&#x27;落地网架底座&#x27;, [0, 0, 0], [0, 0, 0]);
-    for (const x of [-5.1, 5.1]) for (const z of [-4.0, 4.0]) {
-      box(rack, [0.26, 1.05, 0.26], [x, 0.52, z], materials.black);
-      box(rack, [0.62, 0.13, 0.62], [x, 0.065, z], materials.rubber);
-    }
-    box(rack, [10.5, 0.22, 0.25], [0, 1.02, -4.0], materials.black);
-    box(rack, [10.5, 0.22, 0.25], [0, 1.02, 4.0], materials.black);
-    box(rack, [0.25, 0.22, 8.0], [-5.1, 1.02, 0], materials.black);
-    box(rack, [0.25, 0.22, 8.0], [5.1, 1.02, 0], materials.black);
-    for (let x = -4.75; x &lt;= 4.75; x += 0.48) box(rack, [0.055, 0.075, 7.7], [x, 1.06, 0], materials.black);
-    for (let z = -3.65; z &lt;= 3.65; z += 0.48) box(rack, [10.1, 0.075, 0.055], [0, 1.07, z], materials.black);
-
-    // Two fan + long extruded heatsink assemblies match the purchased prototype.
-    const fanFront = makeFan(&#x27;90mm轴流风扇（前）&#x27;, [0, 1.23, -1.42], [0, -2.2, -0.45]);
-    const fanBack = makeFan(&#x27;90mm轴流风扇（后）&#x27;, [0, 1.23, 1.42], [0, -2.2, 0.45]);
-    const sinkFront = makeHeatsink(&#x27;铝散热器（前）&#x27;, -1.42, [0, -1.18, -0.5]);
-    const sinkBack = makeHeatsink(&#x27;铝散热器（后）&#x27;, 1.42, [0, -1.18, 0.5]);
-
-    // The fan deck is supported by four legs, leaving a full open intake plenum below.
-    for (const z of [-1.42, 1.42]) for (const x of [-0.62, 0, 0.62]) {
-      airflowArrow([x, 0.20, z], [0, 1, 0], 0.78, 0x39aee2);
-    }
-    for (const z of [-1.42, 1.42]) {
-      airflowArrow([-3.72, 2.05, z], [-1, 0, 0], 1.08, 0xf07b36);
-      airflowArrow([3.72, 2.05, z], [1, 0, 0], 1.08, 0xf07b36);
-    }
-
-    const tecs = [
-      makeTec(-2.35, -1.42, 1), makeTec(2.35, -1.42, 2),
-      makeTec(-2.35, 1.42, 3), makeTec(2.35, 1.42, 4)
-    ];
-
-    // Aluminum pan is bonded directly above the four TEC cold faces.
-    const tray = part(&#x27;开放式铝合金托盘&#x27;, [0, 2.72, 0], [0, 1.65, 0]);
-    box(tray, [8.75, 0.18, 6.30], [0, 0, 0], materials.aluminumBright);
-    box(tray, [8.75, 0.58, 0.16], [0, 0.29, -3.07], materials.aluminumBright);
-    box(tray, [8.75, 0.58, 0.16], [0, 0.29, 3.07], materials.aluminumBright);
-    box(tray, [0.16, 0.58, 6.0], [-4.30, 0.29, 0], materials.aluminumBright);
-    box(tray, [0.16, 0.58, 6.0], [4.30, 0.29, 0], materials.aluminumBright);
-    for (const x of [-4.05, 4.05]) for (const z of [-2.82, 2.82]) addBolt(tray, x, 0.12, z);
-
-    // XPS shell is a tub: base frame and four low walls, deliberately no top lid.
-    const insulation = part(&#x27;XPS开放式保温槽&#x27;, [0, 2.82, 0], [0, 2.3, 0]);
-    box(insulation, [9.75, 0.42, 0.62], [0, 0.05, -3.48], materials.foam);
-    box(insulation, [9.75, 0.42, 0.62], [0, 0.05, 3.48], materials.foam);
-    box(insulation, [0.62, 0.42, 6.35], [-4.58, 0.05, 0], materials.foam);
-    box(insulation, [0.62, 0.42, 6.35], [4.58, 0.05, 0], materials.foam);
-    box(insulation, [0.62, 1.26, 7.15], [-4.58, 0.79, 0], materials.foam);
-    box(insulation, [0.62, 1.26, 7.15], [4.58, 0.79, 0], materials.foam);
-    box(insulation, [9.75, 1.26, 0.62], [0, 0.79, 3.48], materials.foam);
-    const frontWallLeft = box(insulation, [3.25, 0.92, 0.62], [-3.25, 0.62, -3.48], materials.foam);
-    const frontWallRight = box(insulation, [3.25, 0.92, 0.62], [3.25, 0.62, -3.48], materials.foam);
-    const observationWindow = box(insulation, [3.20, 0.68, 0.12], [0, 0.56, -3.52], materials.window);
-    // Two real recessed cable/probe channels on the foam rim.
-    box(insulation, [2.0, 0.05, 0.16], [-2.4, 1.44, -3.50], materials.foamEdge);
-    box(insulation, [1.2, 0.05, 0.16], [2.7, 1.44, -3.50], materials.foamEdge);
-
-    // Ice plate remains visible through the completely open top.
-    const iceGroup = part(&#x27;标准化冰面&#x27;, [0, 3.06, 0], [-0.5, 3.1, 0]);
-    const icePlate = box(iceGroup, [7.15, 0.42, 4.65], [-0.45, 0, 0], materials.ice);
-    box(iceGroup, [7.08, 0.045, 4.58], [-0.45, 0.235, 0], materials.frost, { castShadow: false });
-    for (let i = 0; i &lt; 18; i++) {
-      const px = -3.5 + ((i * 1.37) % 6.2);
-      const pz = -2.0 + ((i * 0.83) % 3.9);
-      const bubble = new THREE.Mesh(new THREE.SphereGeometry(0.035 + (i % 3) * 0.014, 10, 8), materials.frost);
-      bubble.position.set(px, (i % 4) * 0.055 - 0.11, pz);
-      iceGroup.add(bubble);
-    }
-
-    // Three PT100 measuring points enter through the front groove and touch the ice.
-    const probeGroup = part(&#x27;PT100多点测温&#x27;, [0, 0, 0], [-1.4, 2.0, -1.8]);
-    [-2.1, 0.0, 2.1].forEach((x, idx) =&gt; {
-      cylinder(probeGroup, 0.055, 0.68, [x, 3.43, -1.55 + idx * 0.14], materials.steel, &#x27;x&#x27;, 16);
-      cylinder(probeGroup, 0.09, 0.16, [x - 0.40, 3.43, -1.55 + idx * 0.14], materials.red, &#x27;x&#x27;, 16);
-      tube(probeGroup, [[x - 0.48, 3.43, -1.55 + idx * 0.14], [x - 1.1, 3.30, -2.5], [-4.8, 2.1, -3.9]], 0.025, idx === 1 ? materials.red : materials.wireBlack);
+    const hotPlate = part(&#x27;热端铜底座与热管&#x27;, [0,4.58,0], [0,-.5,0]);
+    box(hotPlate,[3.95,.16,3.95],[0,0,0],M.black); box(hotPlate,[3.60,.12,3.60],[0,-.14,0],M.copper);
+    for (const z of [-1.08,1.08]) for (const x of [-.82,-.28,.28,.82]) cylinder(hotPlate,.075,1.55,[x,-.42,z],M.copper,&#x27;y&#x27;,14);
+    for (const z of [-1.08,1.08]) [-.82,-.28,.28,.82].forEach((x,i) =&gt; {
+      const zz=z+(i-1.5)*.13;
+      tube(hotPlate,[[x,-.58,zz],[x-.72,-.42,zz],[x-1.30,-.10,zz],[x-1.50,.24,zz],[x,.44,zz]],.064,M.copper);
     });
 
-    // Recognizable metal slider: test coupon, weight, eye bolt and low-friction-free pulling cord.
-    const slider = part(&#x27;金属滑块与砝码&#x27;, [-1.75, 3.57, 0], [-2.1, 4.1, 0]);
-    const sliderBody = box(slider, [1.55, 0.42, 1.45], [0, 0, 0], materials.steel);
-    box(slider, [1.38, 0.08, 1.30], [0, -0.24, 0], materials.aluminumBright);
-    cylinder(slider, 0.46, 0.24, [0, 0.34, 0], materials.brass, &#x27;y&#x27;);
-    cylinder(slider, 0.29, 0.16, [0, 0.54, 0], materials.brass, &#x27;y&#x27;);
-    torus(slider, 0.18, 0.052, [0.88, 0.03, 0], materials.steel, [0, Math.PI / 2, 0]);
-    addTextPlate(slider, &#x27;金属试样&#x27;, 1.15, 0.30, [0, 0.05, -0.731]).rotation.y = Math.PI;
+    const tecStack = part(&#x27;成品制冷组件内部TEC&#x27;, [0,4.82,0], [0,.42,0]);
+    [-1.02,1.02].forEach((z, i) =&gt; {
+      box(tecStack,[1.34,.08,1.34],[0,.08,z],M.ceramic); box(tecStack,[1.30,.15,1.30],[0,-.035,z],M.tecEdge); box(tecStack,[1.34,.08,1.34],[0,-.15,z],M.ceramic);
+      textPlate(tecStack,`内部TEC ${i+1}`,1.08,.22,[0,.126,z]).rotation.x=-Math.PI/2;
+    });
 
-    // S-type load cell is inline with the cord and fixed to a rigid bracket.
-    const loadCell = part(&#x27;S型力传感器&#x27;, [4.65, 3.57, 0], [2.9, 3.2, 0]);
-    box(loadCell, [0.48, 0.85, 1.12], [-0.24, 0, 0], materials.brass);
-    box(loadCell, [0.48, 0.85, 1.12], [0.24, 0, 0], materials.brass);
-    box(loadCell, [0.42, 0.30, 0.46], [0, 0.27, 0], materials.brass);
-    box(loadCell, [0.42, 0.30, 0.46], [0, -0.27, 0], materials.brass);
-    cylinder(loadCell, 0.16, 0.08, [-0.25, 0.28, -0.57], materials.black, &#x27;z&#x27;);
-    cylinder(loadCell, 0.16, 0.08, [0.25, -0.28, -0.57], materials.black, &#x27;z&#x27;);
-    tube(loadCell, [[0.1, 0.1, 0.45], [0.4, -0.3, 1.0], [1.2, -1.5, 2.0]], 0.035, materials.red);
+    const coldPlate = part(&#x27;100×100毫米铝冷板&#x27;, [0,5.10,0], [0,1.1,0]);
+    roundedBox(coldPlate,[4.05,.25,4.05],[0,0,0],M.aluminumBright,.14); roundedBox(coldPlate,[4.12,.035,4.12],[0,-.145,0],M.rubber,.10);
+    for (const x of [-1.82,1.82]) for (const z of [-1.82,1.82]) bolt(coldPlate,x,.15,z);
+    textPlate(coldPlate,&#x27;100 × 100 mm 铝冷板&#x27;,2.55,.28,[0,.135,-2.035]).rotation.x=-Math.PI/2;
 
-    // NEMA17 stepper + lead screw support, positioned outside the open trough.
-    const drive = part(&#x27;步进电机牵引机构&#x27;, [6.45, 3.57, 0], [3.7, 3.4, 0]);
-    box(drive, [1.48, 1.48, 1.48], [0, 0, 0], materials.black);
-    box(drive, [0.12, 1.28, 1.28], [-0.78, 0, 0], materials.aluminum);
-    box(drive, [0.12, 1.28, 1.28], [0.78, 0, 0], materials.aluminum);
-    for (const y of [-0.52, 0.52]) for (const z of [-0.52, 0.52]) cylinder(drive, 0.07, 0.12, [-0.86, y, z], materials.steel, &#x27;x&#x27;, 14);
-    cylinder(drive, 0.15, 0.72, [-1.08, 0, 0], materials.steel, &#x27;x&#x27;);
-    cylinder(drive, 0.34, 0.35, [-1.32, 0, 0], materials.black, &#x27;x&#x27;);
-    box(drive, [0.18, 2.1, 2.05], [0.92, -0.40, 0], materials.black);
-    addTextPlate(drive, &#x27;NEMA17&#x27;, 1.02, 0.31, [0, 0, -0.746]).rotation.y = Math.PI;
+    const insulation = part(&#x27;XPS半封闭保温层&#x27;, [0,5.18,0], [0,1.8,0]);
+    box(insulation,[5.25,.30,.52],[0,-.10,-2.38],M.foam); box(insulation,[5.25,.30,.52],[0,-.10,2.38],M.foam);
+    box(insulation,[5.25,1.30,.52],[0,.68,-2.38],M.foam); box(insulation,[5.25,1.30,.52],[0,.68,2.38],M.foam);
+    for (const x of [-2.38,2.38]) { box(insulation,[.52,1.30,1.15],[x,.68,-1.80],M.foam); box(insulation,[.52,1.30,1.15],[x,.68,1.80],M.foam); }
+    box(insulation,[5.05,.07,.10],[0,1.36,-2.10],M.foil); box(insulation,[5.05,.07,.10],[0,1.36,2.10],M.foil);
+    for (const x of [-2.08,2.08]) { box(insulation,[.10,.07,1.12],[x,1.36,-1.68],M.foil); box(insulation,[.10,.07,1.12],[x,1.36,1.68],M.foil); }
+    box(insulation,[1.10,.05,.16],[-1.25,1.37,-2.42],M.foamEdge); box(insulation,[.88,.05,.16],[1.45,1.37,-2.42],M.foamEdge);
 
-    // Dynamic red cord clearly shows the force path from slider to load cell.
-    const cordGeometry = new THREE.BufferGeometry();
-    const cordPositions = new Float32Array(9);
-    cordGeometry.setAttribute(&#x27;position&#x27;, new THREE.BufferAttribute(cordPositions, 3));
-    const cord = new THREE.Line(cordGeometry, new THREE.LineBasicMaterial({ color: 0xe33b31, linewidth: 2 }));
-    machine.add(cord);
-
-    // Electronics board: recognizable ESP32, MAX31865, two LR7843 MOSFETs and blue safety relay.
-    const electronics = part(&#x27;ESP32控制板组&#x27;, [6.5, 1.52, -3.35], [3.2, 0.4, -2.6]);
-    box(electronics, [5.1, 0.16, 2.55], [0, -0.18, 0], materials.aluminum);
-    const esp = makePcb(electronics, [1.35, 2.05], [-1.65, 0, 0], materials.pcbBlue, &#x27;ESP32&#x27;);
-    box(esp, [0.70, 0.12, 0.62], [0, 0.13, -0.37], materials.aluminumBright);
-    box(esp, [0.80, 0.09, 0.38], [0, 0.12, 0.68], materials.foam);
-    box(esp, [0.48, 0.18, 0.32], [0, 0.15, -1.03], materials.aluminumBright);
-    for (const x of [-0.57, 0.57]) for (let z = -0.78; z &lt;= 0.78; z += 0.16) cylinder(esp, 0.025, 0.16, [x, 0.12, z], materials.goldPin, &#x27;y&#x27;, 8);
-    const maxBoard = makePcb(electronics, [1.20, 1.15], [-0.05, 0, -0.55], materials.pcbRed, &#x27;MAX31865&#x27;);
-    for (let x = -0.42; x &lt;= 0.42; x += 0.28) box(maxBoard, [0.20, 0.22, 0.22], [x, 0.15, -0.48], materials.goldPin);
-    const mos1 = makePcb(electronics, [1.10, 0.72], [1.35, 0, -0.70], materials.pcbBlack, &#x27;LR7843&#x27;);
-    const mos2 = makePcb(electronics, [1.10, 0.72], [1.35, 0, 0.22], materials.pcbBlack, &#x27;LR7843&#x27;);
-    [mos1, mos2].forEach(m =&gt; { box(m, [0.42, 0.12, 0.34], [0, 0.16, 0], materials.black); box(m, [0.28, 0.28, 0.42], [0.33, 0.19, 0], materials.relayBlue); });
-    const relay = makePcb(electronics, [1.15, 0.95], [-0.05, 0, 0.75], materials.pcbGreen, &#x27;总继电器&#x27;);
-    box(relay, [0.72, 0.58, 0.62], [0, 0.34, 0], materials.relayBlue);
-
-    // Perforated S-120-12 power supply with terminal cover.
-    const power = part(&#x27;12V 10A开关电源&#x27;, [6.55, 0.78, 3.55], [3.5, -0.1, 2.5]);
-    box(power, [4.35, 1.18, 2.20], [0, 0, 0], materials.aluminumBright);
-    for (let x = -1.7; x &lt;= 1.7; x += 0.38) for (let z = -0.78; z &lt;= 0.78; z += 0.36) {
-      cylinder(power, 0.075, 0.025, [x, 0.605, z], materials.black, &#x27;y&#x27;, 12);
+    const iceGroup = part(&#x27;2–5毫米现场制冰层&#x27;, [0,5.35,0], [0,2.6,0]);
+    const icePlate = roundedBox(iceGroup,[3.92,.18,3.92],[0,0,0],M.ice,.12); roundedBox(iceGroup,[3.86,.035,3.86],[0,.105,0],M.frost,.10,{castShadow:false});
+    box(iceGroup,[3.25,.012,1.30],[-.08,.130,0],M.water,{castShadow:false});
+    for (let i=0;i&lt;26;i++) {
+      const r=.035+(i%4)*.018, px=-1.75+((i*1.17)%3.5), pz=-1.72+((i*.83)%3.42);
+      const lump=new THREE.Mesh(new THREE.SphereGeometry(r,10,8),i%3?M.frost:M.ice); lump.scale.set(1.8,.55,1.1); lump.position.set(px,.13+(i%3)*.015,pz); iceGroup.add(lump);
     }
-    box(power, [0.85, 0.34, 1.85], [-1.70, -0.42, 0], materials.black);
-    for (let z = -0.68; z &lt;= 0.68; z += 0.34) cylinder(power, 0.08, 0.12, [-2.18, -0.25, z], materials.brass, &#x27;x&#x27;, 16);
-    addTextPlate(power, &#x27;S-120-12 / 12V 10A&#x27;, 2.70, 0.45, [0.35, 0, -1.106]).rotation.y = Math.PI;
+    for (let i=0;i&lt;14;i++) { const scratch=box(iceGroup,[2.4+(i%4)*.25,.008,.012],[-.15,.142,-1.35+i*.20],M.aluminumBright,{castShadow:false}); scratch.rotation.y=(i%2?1:-1)*.035; }
 
-    // Visible wiring follows the real red/black harness from TECs to MOSFET and PSU.
-    const harness = part(&#x27;电源线束&#x27;, [0, 0, 0], [1.5, -0.3, 1.8]);
-    tube(harness, [[3.6, 2.35, -2.0], [4.9, 1.85, -2.7], [6.2, 1.7, -3.1]], 0.045, materials.red);
-    tube(harness, [[3.8, 2.18, -1.6], [5.2, 1.45, -2.5], [6.4, 1.55, -3.0]], 0.045, materials.wireBlack);
-    tube(harness, [[7.0, 1.25, -2.7], [7.4, 1.05, 0.0], [7.0, 1.05, 2.55]], 0.055, materials.red);
-    tube(harness, [[6.7, 1.20, -2.8], [7.0, 0.92, 0.0], [6.6, 0.95, 2.55]], 0.055, materials.wireBlack);
+    const probe = part(&#x27;冷板温度探头&#x27;, [0,0,0], [-1.0,1.7,-1.4]);
+    cylinder(probe,.055,.74,[-1.48,5.55,-1.55],M.steel,&#x27;x&#x27;,16); cylinder(probe,.09,.18,[-1.90,5.55,-1.55],M.wireBlack,&#x27;x&#x27;,16);
+    tube(probe,[[-1.98,5.55,-1.55],[-2.65,5.42,-2.10],[-3.45,4.62,-3.15],[-4.65,2.15,-3.65]],.033,M.wireBlack);
 
-    // Accessible projected labels make every purchased module identifiable in PPT.
-    function addLabel(text, object, offset, color) {
-      const el = document.createElement(&#x27;span&#x27;);
-      el.className = &#x27;part-label&#x27;; el.textContent = text; el.style.setProperty(&#x27;--label-color&#x27;, color);
-      labelLayer.appendChild(el);
-      labels.push({ text, object, offset: new THREE.Vector3(...offset), el });
+    const slider = part(&#x27;金属滑块与砝码&#x27;, [-1.05,5.82,0], [-1.6,3.3,0]);
+    const sliderBody = box(slider,[1.38,.42,1.20],[0,0,0],M.steel); box(slider,[1.24,.07,1.08],[0,-.245,0],M.aluminumBright); box(slider,[1.10,.012,.94],[0,-.287,0],M.water,{castShadow:false});
+    cylinder(slider,.40,.22,[0,.33,0],M.brass); cylinder(slider,.26,.16,[0,.52,0],M.brass); torus(slider,.17,.048,[.82,.03,0],M.steel,[0,Math.PI/2,0]); textPlate(slider,&#x27;金属试样&#x27;,1.02,.26,[0,.04,-.606]).rotation.y=Math.PI;
+
+    const loadCell = part(&#x27;0–5 kgf S型力传感器&#x27;, [4.05,5.82,0], [2.6,2.8,0]);
+    box(loadCell,[1.40,.25,.56],[0,.40,0],M.aluminumBright); box(loadCell,[1.40,.25,.56],[0,-.40,0],M.aluminumBright); box(loadCell,[.28,.66,.56],[-.56,0,0],M.aluminumBright); box(loadCell,[.70,.54,.60],[.20,0,0],M.aluminumBright);
+    box(loadCell,[.42,.40,.04],[.16,0,-.32],M.steel); cylinder(loadCell,.10,.42,[-.90,0,0],M.steel,&#x27;x&#x27;); cylinder(loadCell,.10,.42,[.90,0,0],M.steel,&#x27;x&#x27;); torus(loadCell,.19,.050,[-1.14,0,0],M.steel,[0,Math.PI/2,0]);
+    textPlate(loadCell,&#x27;0–5 kgf / M8&#x27;,1.15,.22,[0,.43,-.29]).rotation.x=-.06; box(loadCell,[1.62,.18,1.45],[0,-.68,0],M.black);
+    tube(loadCell,[[.16,.05,.34],[.55,-.45,.80],[1.35,-1.55,1.55]],.028,M.red); tube(loadCell,[[.05,-.03,.35],[.42,-.52,.88],[1.25,-1.62,1.68]],.025,M.wireBlack);
+
+    const drive = part(&#x27;NEMA17与T8丝杆牵引机构&#x27;, [7.05,5.82,0], [3.2,3.0,0]);
+    box(drive,[1.46,1.46,1.46],[0,0,0],M.black); box(drive,[.12,1.28,1.28],[-.78,0,0],M.aluminum); box(drive,[.12,1.28,1.28],[.78,0,0],M.aluminum);
+    for (const y of [-.50,.50]) for (const z of [-.50,.50]) cylinder(drive,.065,.12,[-.86,y,z],M.steel,&#x27;x&#x27;,14);
+    cylinder(drive,.15,.68,[-1.08,0,0],M.steel,&#x27;x&#x27;); cylinder(drive,.33,.36,[-1.42,0,0],M.aluminum,&#x27;x&#x27;); cylinder(drive,.10,3.85,[-3.50,0,0],M.steel,&#x27;x&#x27;,18);
+    for (let x=-5.30;x&lt;=-1.68;x+=.18) torus(drive,.12,.017,[x,0,0],M.aluminumBright,[0,Math.PI/2,0]);
+    cylinder(drive,.09,3.95,[-3.50,-.62,-.48],M.steel,&#x27;x&#x27;,18); cylinder(drive,.09,3.95,[-3.50,-.62,.48],M.steel,&#x27;x&#x27;,18); box(drive,[.25,1.72,1.66],[-5.52,-.20,0],M.black); textPlate(drive,&#x27;NEMA17&#x27;,1.00,.30,[0,0,-.736]).rotation.y=Math.PI;
+
+    const cordGeo = new THREE.BufferGeometry(); const cordArray = new Float32Array(9); cordGeo.setAttribute(&#x27;position&#x27;,new THREE.BufferAttribute(cordArray,3)); const cord = new THREE.Line(cordGeo,new THREE.LineBasicMaterial({color:0xe23c32,linewidth:2})); machine.add(cord);
+
+    const tempController = part(&#x27;成品制冰机数显温控器&#x27;, [-5.25,1.85,-3.25], [-2.6,.4,-2.4]);
+    box(tempController,[3.05,1.28,1.16],[0,0,0],M.controller); box(tempController,[2.78,1.02,.08],[0,0,-.62],M.black);
+    const tcCanvas=document.createElement(&#x27;canvas&#x27;); tcCanvas.width=512; tcCanvas.height=220; const tcCtx=tcCanvas.getContext(&#x27;2d&#x27;); const tcTexture=new THREE.CanvasTexture(tcCanvas); tcTexture.colorSpace=THREE.SRGBColorSpace;
+    const tcScreen=new THREE.Mesh(new THREE.PlaneGeometry(1.55,.62),new THREE.MeshBasicMaterial({map:tcTexture})); tcScreen.position.set(-.42,.15,-.67); tempController.add(tcScreen);
+    for (const x of [.62,1.05]) { box(tempController,[.32,.32,.10],[x,.18,-.68],M.buttonBlue); box(tempController,[.32,.20,.10],[x,-.30,-.68],M.buttonBlue); }
+    textPlate(tempController,&#x27;成品制冷温控器&#x27;,1.95,.27,[0,.72,0]).rotation.x=-Math.PI/2;
+    tube(tempController,[[1.25,-.38,.42],[2.55,-.30,.70],[4.20,1.35,2.25],[5.05,2.85,2.35]],.045,M.red); tube(tempController,[[1.18,-.50,.50],[2.45,-.46,.82],[4.02,1.15,2.45],[4.92,2.65,2.50]],.045,M.wireBlack);
+
+    const dataBox = part(&#x27;ESP32实验控制与数据采集盒&#x27;, [5.60,1.70,-3.35], [2.8,.4,-2.6]);
+    box(dataBox,[4.90,.18,2.36],[0,-.18,0],M.aluminum); for (const x of [-2.08,2.08]) for (const z of [-.92,.92]) cylinder(dataBox,.07,.30,[x,-.38,z],M.brass,&#x27;y&#x27;,12);
+    const esp=makePcb(dataBox,[1.30,1.88],[-1.58,0,0],M.pcbBlue,&#x27;ESP32&#x27;); box(esp,[.67,.12,.58],[0,.13,-.35],M.aluminumBright); box(esp,[.44,.18,.30],[0,.15,-.95],M.aluminumBright); for (const x of [-.54,.54]) for (let z=-.72;z&lt;=.72;z+=.16) cylinder(esp,.022,.15,[x,.12,z],M.gold,&#x27;y&#x27;,8);
+    const hx=makePcb(dataBox,[1.00,.72],[-.10,0,-.58],M.pcbGreen,&#x27;HX711&#x27;); box(hx,[.28,.13,.24],[0,.15,0],M.black);
+    const max=makePcb(dataBox,[1.08,.92],[-.10,0,.55],M.pcbGreen,&#x27;MAX31865&#x27;); for(let x=-.32;x&lt;=.32;x+=.22) box(max,[.16,.18,.18],[x,.14,-.36],M.gold);
+    const driver=makePcb(dataBox,[1.42,1.52],[1.48,0,0],M.pcbBlack,&#x27;T8电机驱动&#x27;); box(driver,[.52,.32,.48],[0,.22,0],M.black); box(driver,[.34,.28,.52],[.45,.20,0],M.aluminumBright);
+    for(let i=0;i&lt;3;i++){ box(dataBox,[.46,.26,.38],[-.65+i*.55,.13,1.00],M.aluminumBright); box(dataBox,[.10,.08,.24],[-.78+i*.55,.31,1.00],M.orange,{rotation:[0,0,-.2]}); }
+
+    const operator = part(&#x27;OLED实验数据显示与EC11旋钮&#x27;, [-5.55,1.78,3.30], [-2.8,.4,2.6]);
+    box(operator,[3.20,1.70,1.55],[0,0,0],M.black); box(operator,[2.86,1.40,.10],[0,0,-.83],M.aluminum);
+    const oledCanvas=document.createElement(&#x27;canvas&#x27;); oledCanvas.width=512; oledCanvas.height=256; const oledCtx=oledCanvas.getContext(&#x27;2d&#x27;); const oledTexture=new THREE.CanvasTexture(oledCanvas); oledTexture.colorSpace=THREE.SRGBColorSpace;
+    const oled=new THREE.Mesh(new THREE.PlaneGeometry(1.80,.88),new THREE.MeshBasicMaterial({map:oledTexture})); oled.position.set(-.35,.28,-.89); operator.add(oled);
+    cylinder(operator,.30,.24,[.98,.28,-.92],M.aluminumBright,&#x27;z&#x27;); cylinder(operator,.21,.28,[.98,.28,-1.05],M.black,&#x27;z&#x27;); box(operator,[.40,.22,.12],[.72,-.48,-.90],M.red); box(operator,[.40,.22,.12],[1.18,-.48,-.90],M.pcbGreen);
+
+    const power = part(&#x27;12V成品制冰机电源&#x27;, [6.15,.92,3.42], [3.2,-.2,2.4]);
+    box(power,[4.00,1.10,2.05],[0,0,0],M.aluminumBright); for(let x=-1.55;x&lt;=1.55;x+=.36) for(let z=-.72;z&lt;=.72;z+=.34) cylinder(power,.07,.025,[x,.565,z],M.black,&#x27;y&#x27;,12); box(power,[.78,.32,1.72],[-1.55,-.38,0],M.black); textPlate(power,&#x27;12V DC 制冰机电源&#x27;,2.48,.40,[.30,0,-1.03]).rotation.y=Math.PI;
+
+    const harness = part(&#x27;低压电源与传感器线束&#x27;,[0,0,0],[1.2,-.2,1.6]);
+    tube(harness,[[2.0,4.65,1.65],[3.2,3.15,2.65],[4.7,1.35,3.15],[5.7,1.10,3.30]],.045,M.red); tube(harness,[[1.82,4.55,1.78],[3.0,2.95,2.85],[4.5,1.20,3.35],[5.55,.98,3.42]],.045,M.wireBlack);
+
+    function addLabel(text, object, offset, color, category=&#x27;experiment&#x27;, overview=false) {
+      const el=document.createElement(&#x27;span&#x27;); el.className=&#x27;part-label&#x27;; el.textContent=text; el.style.setProperty(&#x27;--label-color&#x27;,color); labelLayer.appendChild(el); labels.push({object,offset:new THREE.Vector3(...offset),el,category,overview});
     }
-    addLabel(&#x27;顶部开放的XPS保温槽&#x27;, insulation, [0, 1.75, 3.25], &#x27;#4a99b8&#x27;);
-    addLabel(&#x27;铝托盘＋冰面&#x27;, iceGroup, [-2.7, 0.55, -1.5], &#x27;#58a9d3&#x27;);
-    addLabel(&#x27;金属滑块＋砝码&#x27;, slider, [0, 1.15, 0], &#x27;#c48c2e&#x27;);
-    addLabel(&#x27;PT100 × 3&#x27;, probeGroup, [-1.0, 4.0, -1.7], &#x27;#d63c32&#x27;);
-    addLabel(&#x27;TEC1-12706 × 4&#x27;, tecs[1], [0.7, 0.45, 0.8], &#x27;#287ca8&#x27;);
-    addLabel(&#x27;长铝散热片 × 2&#x27;, sinkFront, [-1.8, -0.15, -1.0], &#x27;#687b8a&#x27;);
-    addLabel(&#x27;90 mm风扇 × 2&#x27;, fanFront, [0, -0.35, -1.4], &#x27;#263746&#x27;);
-    addLabel(&#x27;S型力传感器&#x27;, loadCell, [0, 1.05, 0], &#x27;#ca8d25&#x27;);
-    addLabel(&#x27;NEMA17步进电机&#x27;, drive, [0.2, 1.35, 0], &#x27;#263746&#x27;);
-    addLabel(&#x27;ESP32＋MAX31865＋MOSFET&#x27;, electronics, [0, 0.9, -0.3], &#x27;#1f69ad&#x27;);
-    addLabel(&#x27;12V 10A开关电源&#x27;, power, [0, 1.15, 0], &#x27;#687b8a&#x27;);
-    addLabel(&#x27;四脚架空底座｜风扇下方留通风净空&#x27;, rack, [-2.6, 0.45, -4.0], &#x27;#263746&#x27;);
+    addLabel(&#x27;顶部完全开放｜XPS半封闭保温层&#x27;,insulation,[1.45,1.82,2.15],&#x27;#4a99b8&#x27;,&#x27;experiment&#x27;,true);
+    addLabel(&#x27;100×100 mm铝冷板＋2–5 mm冰层&#x27;,iceGroup,[-.7,.58,-1.40],&#x27;#58a9d3&#x27;,&#x27;cooling&#x27;,false);
+    addLabel(&#x27;金属滑块＋可更换砝码&#x27;,slider,[-.60,1.10,-.45],&#x27;#c48c2e&#x27;,&#x27;mechanics&#x27;,true);
+    addLabel(&#x27;冷板贴片温度探头&#x27;,probe,[-1.55,6.05,-1.55],&#x27;#d63c32&#x27;,&#x27;cooling&#x27;);
+    addLabel(&#x27;成品组件内部TEC（无需自行组装）&#x27;,tecStack,[0,.28,0],&#x27;#287ca8&#x27;,&#x27;cooling&#x27;,false);
+    addLabel(&#x27;四根铜热管／每塔&#x27;,towerA,[.20,1.25,.10],&#x27;#b76533&#x27;,&#x27;cooling&#x27;);
+    addLabel(&#x27;双塔铝鳍片散热器&#x27;,towerB,[1.45,.40,-.40],&#x27;#687b8a&#x27;,&#x27;cooling&#x27;);
+    addLabel(&#x27;90 mm风扇＋护网＋钢丝卡扣 ×2&#x27;,fanA,[-.45,-.28,.42],&#x27;#263746&#x27;,&#x27;cooling&#x27;,true);
+    addLabel(&#x27;0–5 kgf S型力传感器&#x27;,loadCell,[0,1.05,0],&#x27;#ca8d25&#x27;,&#x27;mechanics&#x27;);
+    addLabel(&#x27;NEMA17＋T8丝杆恒速牵引&#x27;,drive,[-.9,1.35,0],&#x27;#263746&#x27;,&#x27;mechanics&#x27;,true);
+    addLabel(&#x27;购买配套数显温控器&#x27;,tempController,[0,1.08,0],&#x27;#d63c32&#x27;,&#x27;control&#x27;,true);
+    addLabel(&#x27;ESP32＋HX711＋MAX31865＋电机驱动&#x27;,dataBox,[0,.92,-.15],&#x27;#1f69ad&#x27;,&#x27;control&#x27;,true);
+    addLabel(&#x27;OLED＋EC11：设置速度并显示实验数据&#x27;,operator,[0,1.18,0],&#x27;#1f69ad&#x27;,&#x27;control&#x27;);
+    addLabel(&#x27;四脚架空底座｜风扇下方与四周留散热空间&#x27;,rack,[-2.8,.52,-4.05],&#x27;#263746&#x27;,&#x27;base&#x27;,false);
 
-    // A subtle assembly direction arrow shows the metal&#x27;s friction-test motion.
-    const arrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(-2.8, 4.55, -2.55), 5.6, 0xd33b32, 0.34, 0.18);
-    machine.add(arrow);
+    const motionArrow=new THREE.ArrowHelper(new THREE.Vector3(1,0,0),new THREE.Vector3(-2.10,6.72,-1.72),4.20,0xd33b32,.30,.17); machine.add(motionArrow);
+    const frontFoam=[...insulation.children].filter(o=&gt;o.position.z &lt; -2.0);
 
-    let playing = true;
-    let explosion = 0;
-    let cutaway = false;
-    let labelsVisible = true;
-    let last = performance.now();
-    let phase = 0;
-
+    let playing=true, explosion=0, cutaway=false, labelsVisible=true, currentView=&#x27;overall&#x27;, cameraTween=null, last=performance.now();
     function setExplosion(value) {
-      explosion = THREE.MathUtils.clamp(value, 0, 1);
-      document.getElementById(&#x27;ifd-explosion&#x27;).value = String(Math.round(explosion * 100));
-      document.getElementById(&#x27;ifd-explosion-value&#x27;).value = `${Math.round(explosion * 100)}%`;
-      for (const p of explodeParts) {
-        p.position.copy(p.userData.base).addScaledVector(p.userData.explode, explosion);
-      }
-      status.textContent = explosion &gt; 0.03
-        ? &#x27;制冷层爆炸图｜可看清“铝托盘底面 → 4片TEC → 2组散热片 → 2个风扇”的实际贴合顺序&#x27;
-        : &#x27;装配视图｜金属滑块在开放冰面上做水平匀速往复运动&#x27;;
+      explosion=Math.max(0,Math.min(1,value)); document.getElementById(&#x27;imf-explosion&#x27;).value=String(Math.round(explosion*100)); document.getElementById(&#x27;imf-explosion-value&#x27;).textContent=`${Math.round(explosion*100)}%`;
+      for(const p of explodeParts) p.position.copy(p.userData.base).addScaledVector(p.userData.explode,explosion);
+      status.textContent=explosion&gt;0?&#x27;爆炸图｜可观察“冰层→铝冷板→成品内部TEC→铜热管→双塔鳍片→双风扇”的层级关系。&#x27;:&#x27;整机总览｜成品制冰机负责结冰与恒温，ESP32负责牵引、测力和实验数据记录。&#x27;;
     }
-
-    function updateCord() {
-      const a = slider.localToWorld(new THREE.Vector3(0.98, 0.04, 0));
-      const b = loadCell.localToWorld(new THREE.Vector3(-0.53, 0, 0));
-      const mid = a.clone().lerp(b, 0.53); mid.y += 0.025;
-      const arr = cord.geometry.attributes.position.array;
-      [a, mid, b].forEach((p, i) =&gt; { arr[i * 3] = p.x; arr[i * 3 + 1] = p.y; arr[i * 3 + 2] = p.z; });
-      cord.geometry.attributes.position.needsUpdate = true;
-      cord.geometry.computeBoundingSphere();
-    }
-
-    function updateLabels() {
-      const rect = canvas.getBoundingClientRect();
-      for (const item of labels) {
-        const p = item.object.localToWorld(item.offset.clone()).project(camera);
-        const visible = labelsVisible &amp;&amp; p.z &gt; -1 &amp;&amp; p.z &lt; 1;
-        item.el.style.display = visible ? &#x27;block&#x27; : &#x27;none&#x27;;
-        if (!visible) continue;
-        const x = (p.x * 0.5 + 0.5) * rect.width;
-        const y = (-p.y * 0.5 + 0.5) * rect.height;
-        item.el.style.left = `${Math.max(60, Math.min(rect.width - 60, x))}px`;
-        item.el.style.top = `${Math.max(18, Math.min(rect.height - 18, y))}px`;
+    function updateCord(){ const a=slider.localToWorld(new THREE.Vector3(.82,.03,0)), b=loadCell.localToWorld(new THREE.Vector3(-1.32,0,0)); const mid=a.clone().lerp(b,.52); mid.y-=.08; const arr=cord.geometry.attributes.position.array; arr.set([a.x,a.y,a.z,mid.x,mid.y,mid.z,b.x,b.y,b.z]); cord.geometry.attributes.position.needsUpdate=true; }
+    function updateLabels(){
+      const rect=canvas.getBoundingClientRect(), placed=[];
+      for(const item of labels){
+        const p=item.object.localToWorld(item.offset.clone()).project(camera);
+        const showCategory=currentView===&#x27;overall&#x27;?(item.overview||item.category===&#x27;base&#x27;):item.category===currentView;
+        const visible=labelsVisible&amp;&amp;showCategory&amp;&amp;p.z&gt;-1&amp;&amp;p.z&lt;1;
+        item.el.style.display=visible?&#x27;block&#x27;:&#x27;none&#x27;;
+        if(!visible) continue;
+        const w=item.el.offsetWidth,h=item.el.offsetHeight;
+        let x=(p.x*.5+.5)*rect.width,y=(-p.y*.5+.5)*rect.height;
+        x=Math.max(w/2+7,Math.min(rect.width-w/2-7,x));
+        y=Math.max(h/2+7,Math.min(rect.height-h/2-7,y));
+        for(let n=0;n&lt;8;n++){
+          const hit=placed.find(b=&gt;Math.abs(x-b.x)&lt;(w+b.w)/2+7&amp;&amp;Math.abs(y-b.y)&lt;(h+b.h)/2+5);
+          if(!hit) break;
+          y=hit.y+(hit.h+h)/2+6;
+          if(y&gt;rect.height-h/2-7) y=Math.max(h/2+7,hit.y-(hit.h+h)/2-6);
+        }
+        item.el.style.left=`${x}px`; item.el.style.top=`${y}px`;
+        item.el.style.opacity=String(Math.max(.45,1-Math.abs(p.z)*.35));
+        placed.push({x,y,w,h});
       }
     }
+    function resize(){ const r=canvas.getBoundingClientRect(); renderer.setSize(Math.max(1,r.width),Math.max(1,r.height),false); camera.aspect=r.width/Math.max(1,r.height); camera.updateProjectionMatrix(); }
+    const presets={ overall:{position:[14.3,10.7,15.2],target:[.4,3.6,0]}, cooling:{position:[-11.4,8.4,-3.4],target:[0,4.05,0]}, mechanics:{position:[13.7,9.4,7.2],target:[2.2,5.65,0]}, control:{position:[12.8,7.0,-13.8],target:[1.1,1.65,-2.3]} };
+    function selectView(name){ currentView=name; const p=presets[name]||presets.overall; cameraTween={start:performance.now(),duration:850,fromP:camera.position.clone(),toP:new THREE.Vector3(...p.position),fromT:controls.target.clone(),toT:new THREE.Vector3(...p.target)}; controls.autoRotate=name===&#x27;overall&#x27;&amp;&amp;playing; const txt={overall:&#x27;整机总览｜成品制冰机负责结冰，ESP32负责实验控制与数据采集。&#x27;,cooling:&#x27;成品制冰机｜100 mm冷板—内部TEC—铜热管—双塔鳍片—双风扇；整套购买后直接安装。&#x27;,mechanics:&#x27;牵引测力｜金属滑块—拉线—S型力传感器—T8丝杆—NEMA17恒速电机。&#x27;,control:&#x27;控制与采集｜购买配套温控器独立管制冷；ESP32读取温度与拉力并驱动步进电机。&#x27;}; status.textContent=txt[name]; }
+    function drawDisplays(temp,force,mu){ tcCtx.fillStyle=&#x27;#170607&#x27;; tcCtx.fillRect(0,0,512,220); tcCtx.fillStyle=&#x27;#ff2b18&#x27;; tcCtx.font=&#x27;bold 138px monospace&#x27;; tcCtx.textAlign=&#x27;center&#x27;; tcCtx.textBaseline=&#x27;middle&#x27;; tcCtx.fillText(`${temp.toFixed(1)}°`,256,112); tcTexture.needsUpdate=true;
+      oledCtx.fillStyle=&#x27;#061520&#x27;; oledCtx.fillRect(0,0,512,256); oledCtx.fillStyle=&#x27;#50ddff&#x27;; oledCtx.font=&#x27;bold 42px Microsoft YaHei, sans-serif&#x27;; oledCtx.textAlign=&#x27;left&#x27;; oledCtx.fillText(`冰面 ${temp.toFixed(1)} °C`,24,58); oledCtx.fillText(`拉力 ${force.toFixed(2)} N`,24,122); oledCtx.fillText(`μk   ${mu.toFixed(3)}`,24,186); oledCtx.fillStyle=&#x27;#9af5b8&#x27;; oledCtx.font=&#x27;30px Microsoft YaHei, sans-serif&#x27;; oledCtx.fillText(&#x27;恒速牵引 / 记录中&#x27;,24,232); oledTexture.needsUpdate=true; }
 
-    function resize() {
-      const rect = canvas.getBoundingClientRect();
-      renderer.setSize(Math.max(1, rect.width), Math.max(1, rect.height), false);
-      camera.aspect = rect.width / Math.max(1, rect.height);
-      camera.updateProjectionMatrix();
-    }
-    new ResizeObserver(resize).observe(canvas);
-    resize();
+    document.getElementById(&#x27;imf-play&#x27;).addEventListener(&#x27;click&#x27;,e=&gt;{playing=!playing;e.currentTarget.textContent=playing?&#x27;暂停运动&#x27;:&#x27;继续运动&#x27;;e.currentTarget.setAttribute(&#x27;aria-pressed&#x27;,String(playing));controls.autoRotate=playing&amp;&amp;currentView===&#x27;overall&#x27;;});
+    document.getElementById(&#x27;imf-explode&#x27;).addEventListener(&#x27;click&#x27;,e=&gt;{const target=explosion&gt;.5?0:1;e.currentTarget.setAttribute(&#x27;aria-pressed&#x27;,String(target===1));const start=performance.now(),from=explosion;function step(now){const q=Math.min(1,(now-start)/650),v=q*q*(3-2*q);setExplosion(from+(target-from)*v);if(q&lt;1)requestAnimationFrame(step);}requestAnimationFrame(step);});
+    document.getElementById(&#x27;imf-cutaway&#x27;).addEventListener(&#x27;click&#x27;,e=&gt;{cutaway=!cutaway;e.currentTarget.setAttribute(&#x27;aria-pressed&#x27;,String(cutaway));e.currentTarget.textContent=cutaway?&#x27;恢复保温层&#x27;:&#x27;保温层剖视&#x27;;for(const obj of frontFoam)obj.visible=!cutaway;});
+    document.getElementById(&#x27;imf-labels&#x27;).addEventListener(&#x27;click&#x27;,e=&gt;{labelsVisible=!labelsVisible;e.currentTarget.textContent=labelsVisible?&#x27;隐藏标注&#x27;:&#x27;显示标注&#x27;;e.currentTarget.setAttribute(&#x27;aria-pressed&#x27;,String(labelsVisible));});
+    document.getElementById(&#x27;imf-reset&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{document.getElementById(&#x27;imf-view&#x27;).value=&#x27;overall&#x27;;selectView(&#x27;overall&#x27;);setExplosion(0);cutaway=false;for(const obj of frontFoam)obj.visible=true;document.getElementById(&#x27;imf-cutaway&#x27;).textContent=&#x27;保温层剖视&#x27;;document.getElementById(&#x27;imf-cutaway&#x27;).setAttribute(&#x27;aria-pressed&#x27;,&#x27;false&#x27;);});
+    document.getElementById(&#x27;imf-view&#x27;).addEventListener(&#x27;change&#x27;,e=&gt;selectView(e.target.value));
+    document.getElementById(&#x27;imf-explosion&#x27;).addEventListener(&#x27;input&#x27;,e=&gt;setExplosion(Number(e.target.value)/100));
+    document.getElementById(&#x27;imf-material&#x27;).addEventListener(&#x27;change&#x27;,e=&gt;{sliderBody.material={steel:M.steel,aluminum:M.aluminumBright,copper:M.copper}[e.target.value]||M.steel;});
 
-    document.getElementById(&#x27;ifd-play&#x27;).addEventListener(&#x27;click&#x27;, event =&gt; {
-      playing = !playing;
-      controls.autoRotate = playing;
-      event.currentTarget.textContent = playing ? &#x27;暂停运动&#x27; : &#x27;继续运动&#x27;;
-      event.currentTarget.setAttribute(&#x27;aria-pressed&#x27;, String(playing));
-    });
-    document.getElementById(&#x27;ifd-explode&#x27;).addEventListener(&#x27;click&#x27;, event =&gt; {
-      const target = explosion &lt; 0.5 ? 1 : 0;
-      event.currentTarget.setAttribute(&#x27;aria-pressed&#x27;, String(target === 1));
-      const start = explosion, startTime = performance.now();
-      function step(now) {
-        const q = Math.min(1, (now - startTime) / 760);
-        const eased = q * q * (3 - 2 * q);
-        setExplosion(start + (target - start) * eased);
-        if (q &lt; 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    });
-    document.getElementById(&#x27;ifd-cut&#x27;).addEventListener(&#x27;click&#x27;, event =&gt; {
-      cutaway = !cutaway;
-      frontWallLeft.visible = !cutaway;
-      frontWallRight.visible = !cutaway;
-      observationWindow.visible = !cutaway;
-      event.currentTarget.textContent = cutaway ? &#x27;恢复前壁&#x27; : &#x27;剖开前壁&#x27;;
-      event.currentTarget.setAttribute(&#x27;aria-pressed&#x27;, String(cutaway));
-      status.textContent = cutaway ? &#x27;剖视状态｜前壁已隐藏，可直接观察冰面、温度探头与托盘内部&#x27; : &#x27;装配视图｜顶部始终开放，不存在顶盖&#x27;;
-    });
-    document.getElementById(&#x27;ifd-labels&#x27;).addEventListener(&#x27;click&#x27;, event =&gt; {
-      labelsVisible = !labelsVisible;
-      event.currentTarget.textContent = labelsVisible ? &#x27;隐藏标注&#x27; : &#x27;显示标注&#x27;;
-      event.currentTarget.setAttribute(&#x27;aria-pressed&#x27;, String(labelsVisible));
-    });
-    document.getElementById(&#x27;ifd-reset&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; {
-      setExplosion(0);
-      cutaway = false;
-      frontWallLeft.visible = frontWallRight.visible = observationWindow.visible = true;
-      camera.position.set(15.5, 11.5, 16.5);
-      controls.target.set(0.4, 2.45, 0);
-      controls.update();
-      document.getElementById(&#x27;ifd-cut&#x27;).textContent = &#x27;剖开前壁&#x27;;
-      document.getElementById(&#x27;ifd-cut&#x27;).setAttribute(&#x27;aria-pressed&#x27;, &#x27;false&#x27;);
-      document.getElementById(&#x27;ifd-explode&#x27;).setAttribute(&#x27;aria-pressed&#x27;, &#x27;false&#x27;);
-      status.textContent = &#x27;装配视图｜金属滑块在开放冰面上做水平匀速往复运动&#x27;;
-    });
-    document.getElementById(&#x27;ifd-explosion&#x27;).addEventListener(&#x27;input&#x27;, event =&gt; setExplosion(Number(event.target.value) / 100));
-    document.getElementById(&#x27;ifd-material&#x27;).addEventListener(&#x27;change&#x27;, event =&gt; {
-      const choice = event.target.value;
-      const map = { steel: materials.steel, aluminum: materials.aluminumBright, copper: materials.copper, brass: materials.brass };
-      sliderBody.material = map[choice];
-    });
-
-    function animate(now) {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      if (playing) {
-        phase += dt;
-        for (const fan of fans) fan.rotation.y -= dt * 8.5;
-        airflowArrows.forEach((flow, index) =&gt; {
-          const pulse = 0.88 + 0.14 * Math.sin(phase * 3.2 + index * 0.7);
-          flow.scale.set(1, pulse, 1);
-        });
-        if (explosion &lt; 0.04) slider.position.x = slider.userData.base.x + Math.sin(phase * 0.72) * 1.75;
-      }
-      updateCord();
-      controls.update();
-      renderer.render(scene, camera);
-      updateLabels();
-      requestAnimationFrame(animate);
-    }
-
-    setExplosion(0);
-    updateCord();
-    requestAnimationFrame(animate);
+    function animate(now){ const dt=Math.min(.05,(now-last)/1000); last=now; if(playing){ for(const f of fans)f.rotation.x-=dt*10.5; const travel=(Math.sin(now*.00055)+1)*1.05; slider.position.x=slider.userData.base.x+travel; const phase=(Math.sin(now*.0011)+1)*.5; airflow.forEach((a,i)=&gt;{a.line.material.opacity=.30+.40*((phase+i*.23)%1);a.cone.material.opacity=.48+.40*((phase+i*.23)%1);}); }
+      if(cameraTween){const q=Math.min(1,(now-cameraTween.start)/cameraTween.duration),e=q*q*(3-2*q);camera.position.lerpVectors(cameraTween.fromP,cameraTween.toP,e);controls.target.lerpVectors(cameraTween.fromT,cameraTween.toT,e);if(q&gt;=1)cameraTween=null;}
+      const temp=-4.1+Math.sin(now*.00072)*.18,force=3.42+Math.sin(now*.0013)*.17,mu=force/(1.25*9.81); const mm=Math.round((slider.position.x-slider.userData.base.x)*25);
+      document.getElementById(&#x27;imf-temp&#x27;).textContent=`冰面 ${temp.toFixed(1)} °C`;document.getElementById(&#x27;imf-force&#x27;).textContent=`拉力 ${force.toFixed(2)} N`;document.getElementById(&#x27;imf-mu&#x27;).textContent=`μk ${mu.toFixed(3)}`;document.getElementById(&#x27;imf-stroke&#x27;).textContent=`位移 ${mm} mm`;drawDisplays(temp,force,mu);
+      updateCord();controls.update();updateLabels();renderer.render(scene,camera);requestAnimationFrame(animate);}
+    window.addEventListener(&#x27;resize&#x27;,resize); if(window.ResizeObserver)new ResizeObserver(resize).observe(root); resize(); setExplosion(0); updateCord(); requestAnimationFrame(animate);
   &lt;/script&gt;
 &lt;/div&gt;
 
