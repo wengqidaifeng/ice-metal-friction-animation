@@ -1,6 +1,6 @@
 # 冰-金属摩擦实验控制台
 
-这是配套 `esp32_ice_friction_slider` 固件的本地 Web 串口调试软件。它通过浏览器 Web Serial API 连接 ESP32-S3，适配 115200 baud、8N1 和当前固件协议。
+这是配套 `esp32_ice_friction_slider` 固件的控制台。浏览器版使用 Web Serial API，Electron 桌面版使用原生 `serialport` 通道，均适配 115200 baud、8N1 和当前固件协议。当前固件还支持 ESP32 Wi-Fi API，桌面版可在顶部切换 USB 串口和 Wi-Fi。
 
 ## 启动
 

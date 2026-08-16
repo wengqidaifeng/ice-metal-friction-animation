@@ -3,7 +3,7 @@
 
   const $ = (id) => document.getElementById(id);
   const els = {
-    connectBtn: $("connectBtn"), demoBtn: $("demoBtn"), connectionDot: $("connectionDot"), connectionText: $("connectionText"), portText: $("portText"), stateBadge: $("stateBadge"),
+    connectBtn: $("connectBtn"), demoBtn: $("demoBtn"), connectionDot: $("connectionDot"), connectionText: $("connectionText"), connectionMode: $("connectionMode"), serialPort: $("serialPortSelect"), wifiUrl: $("wifiUrlInput"), portText: $("portText"), stateBadge: $("stateBadge"),
     position: $("positionMetric"), speed: $("speedMetric"), force: $("forceMetric"), mu: $("muMetric"), muK: $("muKMetric"), muS: $("muSMetric"), calState: $("calState"),
     mass: $("massInput"), window: $("windowInput"), forceChart: $("forceChart"), motionChart: $("motionChart"), forceRange: $("forceRange"), sampleRate: $("sampleRate"),
     recordBtn: $("recordBtn"), recordState: $("recordState"), exportBtn: $("exportBtn"), clearBtn: $("clearBtn"), clearLogBtn: $("clearLogBtn"), logBox: $("logBox"),
@@ -12,7 +12,7 @@
   };
 
   const state = {
-    port: null, reader: null, writer: null, readBuffer: "", connected: false, demo: false, demoTimer: null,
+    port: null, reader: null, writer: null, readBuffer: "", connected: false, transport: "serial", wifiBaseUrl: "http://192.168.4.1", wifiTimer: null, wifiSeq: 0, wifiErrorShown: false, demo: false, demoTimer: null,
     samples: [], recordRows: [], recording: false, steadyForces: [], peakForce: null, lastDeviceMs: null, rateTimes: [], currentState: "IDLE", lineCount: 0
   };
   const encoder = new TextEncoder();
@@ -23,7 +23,7 @@
     els.logBox.textContent += `${time}${prefix}${message}\n`;
     els.logBox.scrollTop = els.logBox.scrollHeight;
   }
-  function setConnection(online, label = "未连接", port = "115200 8N1") {
+  function setConnection(online, label = "未连接", port = "推荐 COM12 · 115200 8N1") {
     state.connected = online;
     els.connectionDot.className = `status-dot ${online ? "online" : "offline"}`;
     els.connectionText.textContent = label;
@@ -99,8 +99,65 @@
     if (values.accel_mm_s2) $("accelInput").value = Number(values.accel_mm_s2);
     if (values.steps_per_mm) els.stepsPerMm.textContent = `${Number(values.steps_per_mm).toFixed(1)} step/mm`;
     if (values.cal === "1") { els.calState.textContent = "已标定"; els.calState.className = "badge running"; }
+    updateSafety(values.limits_installed === "1", values.home === "1", values.far === "1", values.estop_installed === "1", values.estop === "1");
     log(line);
   }
+  function processSerialChunk(text) {
+    state.readBuffer += text;
+    const lines = state.readBuffer.split(/\r?\n/);
+    state.readBuffer = lines.pop() || "";
+    lines.forEach(handleLine);
+  }
+  function updateSafety(limitsInstalled, homeActive, farActive, estopInstalled, estopActive) {
+    $("homeLimit").textContent = limitsInstalled ? (homeActive ? "触发" : "未触发") : "未安装";
+    $("farLimit").textContent = limitsInstalled ? (farActive ? "触发" : "未触发") : "未安装";
+    $("estopState").textContent = estopInstalled ? (estopActive ? "触发" : "未触发") : "未安装";
+  }
+  function applyWifiStatus(status) {
+    if (status.state) setBadge(status.state);
+    if (Number.isFinite(Number(status.pos_mm))) els.position.textContent = numeric(Number(status.pos_mm));
+    if (Number.isFinite(Number(status.speed_mm_s))) els.speed.textContent = numeric(Math.abs(Number(status.speed_mm_s)));
+    if (status.target_mm_s !== undefined) $("speedInput").value = Number(status.target_mm_s);
+    if (status.distance_mm !== undefined) $("distanceInput").value = Number(status.distance_mm);
+    if (status.accel_mm_s2 !== undefined) $("accelInput").value = Number(status.accel_mm_s2);
+    if (status.steps_per_mm !== undefined) els.stepsPerMm.textContent = `${Number(status.steps_per_mm).toFixed(1)} step/mm`;
+    if (status.calibrated) { els.calState.textContent = "已标定"; els.calState.className = "badge running"; }
+    updateSafety(Boolean(status.home_installed), Boolean(status.home_active), Boolean(status.far_active), Boolean(status.estop_installed), Boolean(status.estop_active));
+  }
+  async function pollWifi() {
+    if (!state.connected || state.transport !== "wifi") return;
+    try {
+      const [statusResponse, samplesResponse] = await Promise.all([
+        fetch(`${state.wifiBaseUrl}/api/status?ts=${Date.now()}`, { cache: "no-store" }),
+        fetch(`${state.wifiBaseUrl}/api/samples?after=${state.wifiSeq}`, { cache: "no-store" })
+      ]);
+      if (!statusResponse.ok || !samplesResponse.ok) throw new Error("ESP32 Wi-Fi API 返回异常");
+      applyWifiStatus(await statusResponse.json());
+      const payload = await samplesResponse.json();
+      (payload.samples || []).forEach((sample) => {
+        state.wifiSeq = Math.max(state.wifiSeq, Number(sample.seq) || 0);
+        const force = sample.force === null ? "nan" : sample.force;
+        const raw = `DATA,${sample.t},${sample.position},${sample.speed},${force},${sample.steady ? 1 : 0},${sample.state}`;
+        parseData(["DATA", sample.t, sample.position, sample.speed, force, sample.steady ? "1" : "0", sample.state], raw);
+      });
+      state.wifiErrorShown = false;
+    } catch (error) {
+      if (!state.wifiErrorShown) { log(`Wi-Fi 连接异常：${error.message}`, "error"); state.wifiErrorShown = true; }
+    }
+  }
+  function startWifiPolling() { clearInterval(state.wifiTimer); state.wifiTimer = setInterval(() => { void pollWifi(); }, 200); void pollWifi(); }
+  async function connectWifi() {
+    const baseUrl = els.wifiUrl.value.trim().replace(/\/+$/, "");
+    if (!/^https?:\/\//i.test(baseUrl)) throw new Error("Wi-Fi 地址应以 http:// 开头，例如 http://192.168.4.1");
+    const response = await fetch(`${baseUrl}/api/status?ts=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`无法访问 ${baseUrl}`);
+    state.transport = "wifi"; state.wifiBaseUrl = baseUrl; state.wifiSeq = 0; state.wifiErrorShown = false;
+    setConnection(true, "Wi-Fi 已连接", baseUrl.replace(/^https?:\/\//i, ""));
+    log(`已连接 ESP32 Wi-Fi：${baseUrl}`);
+    applyWifiStatus(await response.json());
+    startWifiPolling();
+  }
+  async function disconnectWifi() { clearInterval(state.wifiTimer); state.wifiTimer = null; state.wifiErrorShown = false; state.connected = false; setConnection(false); log("Wi-Fi 已断开"); }
   async function readLoop() {
     try {
       while (state.port && state.port.readable) {
@@ -109,29 +166,41 @@
           while (true) {
             const { value, done } = await state.reader.read();
             if (done) break;
-            state.readBuffer += new TextDecoder().decode(value);
-            const lines = state.readBuffer.split(/\r?\n/);
-            state.readBuffer = lines.pop() || "";
-            lines.forEach(handleLine);
+            processSerialChunk(new TextDecoder().decode(value));
           }
         } finally { state.reader.releaseLock(); state.reader = null; }
       }
     } catch (error) { log(`串口读取异常：${error.message}`, "error"); }
   }
   async function connectSerial() {
-    if (!("serial" in navigator)) { log("当前浏览器不支持 Web Serial，请使用最新版 Edge 或 Chrome。", "error"); return; }
     if (state.connected) { await disconnectSerial(); return; }
     try {
+      if (window.desktopSerial) {
+        const path = els.serialPort.value || "COM12";
+        const result = await window.desktopSerial.open({ path, baudRate: 115200 });
+        state.transport = "serial";
+        setConnection(true, "串口已连接", `${result.path} · 115200 8N1`);
+        log(`已打开 ${result.path}，串口参数 115200/8N1`);
+        await sendCommand("STATUS");
+        return;
+      }
+      if (!("serial" in navigator)) { log("当前浏览器不支持 Web Serial，请使用最新版 Edge 或 Chrome。", "error"); return; }
       state.port = await navigator.serial.requestPort();
       await state.port.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: "none", flowControl: "none" });
       state.writer = state.port.writable.getWriter();
-      setConnection(true, "已连接", "115200 8N1");
+      state.transport = "serial";
+      setConnection(true, "串口已连接", "115200 8N1");
       log("串口已打开");
       readLoop();
       await sendCommand("STATUS");
     } catch (error) { log(`连接失败：${error.message}`, "error"); state.port = null; setConnection(false); }
   }
   async function disconnectSerial() {
+    if (window.desktopSerial) {
+      try { await window.desktopSerial.close(); } catch (_) { /* already closed */ }
+      state.port = null; state.connected = false; setConnection(false); log("串口已断开");
+      return;
+    }
     try { if (state.reader) await state.reader.cancel(); } catch (_) { /* reader may already be released */ }
     try { if (state.writer) { state.writer.releaseLock(); state.writer = null; } } catch (_) { /* no-op */ }
     try { if (state.port) await state.port.close(); } catch (_) { /* port may already be closed */ }
@@ -144,6 +213,19 @@
       state.peakForce = null;
     }
     if (state.demo) { log(`模拟响应：${command}`); return; }
+    if (state.transport === "wifi") {
+      try {
+        const response = await fetch(`${state.wifiBaseUrl}/api/command`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `cmd=${encodeURIComponent(command.trim())}` });
+        const result = await response.json();
+        log(result.message || (response.ok ? "OK" : "请求失败"), response.ok ? "info" : "error");
+      } catch (error) { log(`Wi-Fi 命令失败：${error.message}`, "error"); }
+      return;
+    }
+    if (window.desktopSerial) {
+      try { await window.desktopSerial.write(`${command.trim()}\n`); }
+      catch (error) { log(`发送失败：${error.message}`, "error"); }
+      return;
+    }
     if (!state.writer) { log("请先连接串口。", "error"); return; }
     try { await state.writer.write(encoder.encode(`${command.trim()}\n`)); }
     catch (error) { log(`发送失败：${error.message}`, "error"); }
@@ -210,7 +292,29 @@
   }));
   document.querySelectorAll("[data-input]").forEach((button) => button.addEventListener("click", () => { const value = Number($(button.dataset.input).value); if (!Number.isFinite(value)) return; sendCommand(`${button.dataset.command} ${value}`); }));
   els.calBtn.addEventListener("click", () => { const grams = prompt("请输入已知标定质量（g），例如 200：", "200"); const value = Number(grams); if (Number.isFinite(value) && value > 0) sendCommand(`CAL ${value}`); });
-  els.connectBtn.addEventListener("click", connectSerial); els.demoBtn.addEventListener("click", startDemo); els.recordBtn.addEventListener("click", toggleRecording); els.exportBtn.addEventListener("click", exportCsv); els.clearBtn.addEventListener("click", clearData); els.clearLogBtn.addEventListener("click", () => { els.logBox.textContent = ""; });
+  async function connectTransport() { if (state.connected) { if (state.transport === "wifi") await disconnectWifi(); else await disconnectSerial(); return; } try { if (els.connectionMode.value === "wifi") await connectWifi(); else await connectSerial(); } catch (error) { log(`连接失败：${error.message}`, "error"); setConnection(false); } }
+  async function refreshDesktopPorts() {
+    if (!window.desktopSerial) return;
+    try {
+      const ports = await window.desktopSerial.list();
+      els.serialPort.replaceChildren();
+      const ordered = [...ports].sort((a, b) => {
+        const score = (port) => /COM12|wch|CH343|CH340/i.test(`${port.path} ${port.manufacturer || ""}`) ? 0 : 1;
+        return score(a) - score(b) || String(a.path).localeCompare(String(b.path));
+      });
+      ordered.forEach((port) => { const option = document.createElement("option"); option.value = port.path; option.textContent = `${port.path} · ${port.manufacturer || "未知设备"}`; els.serialPort.append(option); });
+      const preferred = ordered.find((port) => /COM12|wch|CH343|CH340/i.test(`${port.path} ${port.manufacturer || ""}`));
+      if (preferred) els.serialPort.value = preferred.path;
+      els.portText.textContent = preferred ? `${preferred.path} · 115200 8N1` : "未发现串口 · 115200 8N1";
+    } catch (error) { log(`读取串口列表失败：${error.message}`, "error"); }
+  }
+  if (window.desktopSerial) {
+    window.desktopSerial.onData(processSerialChunk);
+    window.desktopSerial.onError((message) => log(`串口异常：${message}`, "error"));
+    void refreshDesktopPorts();
+  }
+  els.connectionMode.addEventListener("change", () => { const wifi = els.connectionMode.value === "wifi"; els.wifiUrl.hidden = !wifi; els.serialPort.hidden = wifi; els.portText.textContent = wifi ? "热点：IceFriction-ESP32" : "推荐 COM12 · 115200 8N1"; els.connectBtn.textContent = wifi ? "连接 Wi-Fi" : "连接串口"; });
+  els.connectBtn.addEventListener("click", connectTransport); els.demoBtn.addEventListener("click", startDemo); els.recordBtn.addEventListener("click", toggleRecording); els.exportBtn.addEventListener("click", exportCsv); els.clearBtn.addEventListener("click", clearData); els.clearLogBtn.addEventListener("click", () => { els.logBox.textContent = ""; });
   els.sendRawBtn.addEventListener("click", () => { const command = els.rawCommand.value.trim(); if (command) { sendCommand(command); els.rawCommand.value = ""; } });
   els.rawCommand.addEventListener("keydown", (event) => { if (event.key === "Enter") els.sendRawBtn.click(); });
   window.addEventListener("resize", drawCharts); els.mass.addEventListener("input", () => { const latest = state.samples[state.samples.length - 1]; if (latest) updateMetrics(latest); });

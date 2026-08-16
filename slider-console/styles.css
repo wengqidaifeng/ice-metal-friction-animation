@@ -23,6 +23,10 @@ h1 { font-size: 19px; letter-spacing: 0; }
 .brand p { margin-top: 2px; color: #b9cad4; font-size: 12px; }
 .connection-area { display: flex; align-items: center; gap: 10px; font-size: 13px; }
 .muted { color: #9eb1bd; margin-right: 5px; }
+.mode-select, .wifi-url { min-height: 31px; border: 1px solid rgba(255,255,255,.32); border-radius: 4px; color: #fff; background: rgba(255,255,255,.1); padding: 5px 8px; outline: 0; }
+.mode-select option { color: var(--ink); background: #fff; }
+.wifi-url { width: 170px; }
+.wifi-url::placeholder { color: #c1d0d7; }
 .status-dot { width: 9px; height: 9px; border-radius: 50%; background: #8d9aa1; }
 .status-dot.online { background: #64d2a1; box-shadow: 0 0 0 4px rgba(100,210,161,.16); }
 .layout { max-width: 1500px; margin: 0 auto; padding: 22px 28px 30px; display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; }

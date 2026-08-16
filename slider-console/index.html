@@ -18,7 +18,13 @@
     <div class="connection-area">
       <span id="connectionDot" class="status-dot offline"></span>
       <span id="connectionText">未连接</span>
-      <span id="portText" class="muted">115200 8N1</span>
+      <select id="connectionMode" class="mode-select" aria-label="连接方式">
+        <option value="serial">USB 串口</option>
+        <option value="wifi">ESP32 Wi-Fi</option>
+      </select>
+      <select id="serialPortSelect" class="mode-select" aria-label="串口端口"><option value="COM12">COM12 · CH343</option></select>
+      <input id="wifiUrlInput" class="wifi-url" type="text" value="http://192.168.4.1" aria-label="ESP32 Wi-Fi 地址" hidden>
+      <span id="portText" class="muted">推荐 COM12 · 115200 8N1</span>
       <button id="connectBtn" class="button primary">连接串口</button>
       <button id="demoBtn" class="button ghost">模拟数据</button>
     </div>
@@ -32,7 +38,7 @@
         <div class="safety-row"><span>FAR 限位</span><strong id="farLimit">未由固件上报</strong></div>
         <div class="safety-row"><span>实体急停</span><strong id="estopState">未由固件上报</strong></div>
         <div class="safety-row"><span>驱动分辨率</span><strong id="stepsPerMm">待查询</strong></div>
-        <div class="notice warning">当前固件的 STATUS 不包含限位状态。未安装限位开关前，不要点击 HOME，也不要让滑台无人看守运行。</div>
+        <div class="notice warning">当前固件已支持限位状态上报。未安装限位开关前，不要点击 HOME，也不要让滑台无人看守运行。</div>
       </section>
 
       <section class="panel">
@@ -108,7 +114,7 @@
       </section>
     </section>
   </main>
-  <footer><span>冰-金属摩擦实验控制台</span><span>Web Serial · 115200 baud · 8N1</span></footer>
+  <footer><span>冰-金属摩擦实验控制台</span><span>USB 串口 · ESP32 Wi-Fi API</span></footer>
   <script src="app.js"></script>
 </body>
 </html>

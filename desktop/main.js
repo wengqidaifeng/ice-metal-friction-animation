@@ -1,10 +1,42 @@
-const { app, BrowserWindow, dialog, session } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const { SerialPort } = require("serialport");
 
 const consoleRoot = path.join(__dirname, "..", "slider-console");
 let server;
+let activeSerialPort;
+
+async function closeSerialPort() {
+  const port = activeSerialPort;
+  activeSerialPort = null;
+  if (!port?.isOpen) return;
+  await new Promise((resolve) => port.close(() => resolve()));
+}
+
+ipcMain.handle("serial:list", async () => SerialPort.list());
+ipcMain.handle("serial:open", async (event, options) => {
+  await closeSerialPort();
+  const port = new SerialPort({
+    path: options.path,
+    baudRate: Number(options.baudRate) || 115200,
+    dataBits: 8,
+    stopBits: 1,
+    parity: "none",
+    autoOpen: false
+  });
+  await new Promise((resolve, reject) => port.open((error) => error ? reject(error) : resolve()));
+  port.on("data", (data) => event.sender.send("serial:data", data.toString("utf8")));
+  port.on("error", (error) => event.sender.send("serial:error", error.message));
+  activeSerialPort = port;
+  return { path: port.path, baudRate: port.baudRate };
+});
+ipcMain.handle("serial:write", async (_event, text) => {
+  if (!activeSerialPort?.isOpen) throw new Error("串口未打开");
+  await new Promise((resolve, reject) => activeSerialPort.write(text, (error) => error ? reject(error) : resolve()));
+});
+ipcMain.handle("serial:close", closeSerialPort);
 
 function contentType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -54,30 +86,10 @@ async function createWindow() {
     autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
-      sandbox: true,
-      nodeIntegration: false
+      sandbox: false,
+      nodeIntegration: false,
+      preload: path.join(__dirname, "preload.js")
     }
-  });
-
-  // Electron requires the main process to approve and select serial devices.
-  session.defaultSession.setPermissionCheckHandler((_webContents, permission) => permission === "serial");
-  session.defaultSession.setDevicePermissionHandler((details) => details.deviceType === "serial");
-  win.webContents.on("select-serial-port", (event, portList, _webContents, callback) => {
-    event.preventDefault();
-    if (!portList.length) {
-      callback("");
-      return;
-    }
-    const labels = portList.map((port, index) => `${index + 1}. ${port.displayName || port.portId}`);
-    dialog.showMessageBox(win, {
-      type: "question",
-      title: "选择 ESP32 串口",
-      message: "请选择要连接的串口：",
-      detail: labels.join("\n"),
-      buttons: [...labels, "取消"],
-      defaultId: 0,
-      cancelId: labels.length
-    }).then(({ response }) => callback(response < portList.length ? portList[response].portId : ""));
   });
 
   const port = await startLocalServer();
@@ -96,6 +108,7 @@ app.whenReady().then(async () => {
 });
 
 app.on("window-all-closed", () => {
+  void closeSerialPort();
   if (server) server.close();
   if (process.platform !== "darwin") app.quit();
 });

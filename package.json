@@ -22,15 +22,22 @@
     "files": [
       "desktop/**/*",
       "slider-console/**/*",
+      "node_modules/serialport/**/*",
+      "node_modules/@serialport/**/*",
       "package.json"
     ],
     "win": {
       "target": [
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     }
+  },
+  "dependencies": {
+    "serialport": "^13.0.0"
   }
 }
