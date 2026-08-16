@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>冰-金属摩擦实验控制台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">μ</div>
+      <div>
+        <h1>冰-金属摩擦实验控制台</h1>
+        <p>ESP32 丝杆滑台 · 低速牵引 · 实时采集</p>
+      </div>
+    </div>
+    <div class="connection-area">
+      <span id="connectionDot" class="status-dot offline"></span>
+      <span id="connectionText">未连接</span>
+      <span id="portText" class="muted">115200 8N1</span>
+      <button id="connectBtn" class="button primary">连接串口</button>
+      <button id="demoBtn" class="button ghost">模拟数据</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel safety-panel">
+        <div class="panel-heading"><h2>安全状态</h2><span id="stateBadge" class="badge idle">IDLE</span></div>
+        <div class="safety-row"><span>HOME 限位</span><strong id="homeLimit">未由固件上报</strong></div>
+        <div class="safety-row"><span>FAR 限位</span><strong id="farLimit">未由固件上报</strong></div>
+        <div class="safety-row"><span>实体急停</span><strong id="estopState">未由固件上报</strong></div>
+        <div class="safety-row"><span>驱动分辨率</span><strong id="stepsPerMm">待查询</strong></div>
+        <div class="notice warning">当前固件的 STATUS 不包含限位状态。未安装限位开关前，不要点击 HOME，也不要让滑台无人看守运行。</div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><h2>运动参数</h2><span class="unit-note">单位：mm / s</span></div>
+        <label class="field">拉动速度 <span>0.1–5.0</span>
+          <div class="input-with-unit"><input id="speedInput" type="number" min="0.1" max="5" step="0.1" value="0.2"><em>mm/s</em></div>
+        </label>
+        <button class="button apply" data-command="SPEED" data-input="speedInput">应用速度</button>
+        <label class="field">运行行程 <span>0–100</span>
+          <div class="input-with-unit"><input id="distanceInput" type="number" min="0.1" max="100" step="0.1" value="20"><em>mm</em></div>
+        </label>
+        <button class="button apply" data-command="DIST" data-input="distanceInput">应用行程</button>
+        <label class="field">加速度 <span>0.1–10</span>
+          <div class="input-with-unit"><input id="accelInput" type="number" min="0.1" max="10" step="0.1" value="2"><em>mm/s²</em></div>
+        </label>
+        <button class="button apply" data-command="ACCEL" data-input="accelInput">应用加速度</button>
+        <label class="field">金属块质量
+          <div class="input-with-unit"><input id="massInput" type="number" min="0" step="0.1" value="200"><em>g</em></div>
+        </label>
+        <p class="help">质量用于计算 μ = F<sub>t</sub> / (m g)，不参与电机控制。</p>
+      </section>
+
+      <section class="panel command-panel">
+        <div class="panel-heading"><h2>运动控制</h2><span class="unit-note">请先确认冰面范围</span></div>
+        <div class="button-grid">
+          <button id="homeBtn" class="button outline" data-command="HOME">HOME 回零</button>
+          <button class="button outline" data-command="JOG -2">点动 -2 mm</button>
+          <button class="button outline" data-command="JOG 2">点动 +2 mm</button>
+          <button class="button run" data-command="RUN">按行程运行</button>
+          <button class="button stop" data-command="STOP">受控停止</button>
+          <button id="resetBtn" class="button outline" data-command="RESET">复位故障</button>
+        </div>
+        <button class="button estop" data-command="ESTOP">软件急停</button>
+        <p class="help danger-help">软件急停通过串口发送指令，不等同于断电式实体急停。最终装置应保留独立硬件急停。</p>
+      </section>
+
+      <section class="panel calibration-panel">
+        <div class="panel-heading"><h2>拉力传感器</h2><span id="calState" class="badge muted-badge">未标定</span></div>
+        <div class="button-grid two">
+          <button class="button outline" data-command="TARE">去皮 TARE</button>
+          <button id="calBtn" class="button outline">质量标定 CAL</button>
+        </div>
+        <p class="help">标定前卸下金属块，去皮后悬挂已知质量，再点击 CAL。固件当前将标定值保存在 RAM，重启后需重新确认。</p>
+      </section>
+    </aside>
+
+    <section class="content">
+      <section class="metrics-grid">
+        <div class="metric"><span>当前位置</span><strong id="positionMetric">0.000</strong><em>mm</em></div>
+        <div class="metric"><span>实际速度</span><strong id="speedMetric">0.000</strong><em>mm/s</em></div>
+        <div class="metric accent"><span>当前拉力 F<sub>t</sub></span><strong id="forceMetric">--</strong><em>N</em></div>
+        <div class="metric accent"><span>瞬时摩擦系数 μ</span><strong id="muMetric">--</strong><em>无量纲</em></div>
+        <div class="metric"><span>匀速段平均 μ<sub>k</sub></span><strong id="muKMetric">--</strong><em>steady</em></div>
+        <div class="metric"><span>启动峰值 μ<sub>s</sub></span><strong id="muSMetric">--</strong><em>峰值</em></div>
+      </section>
+
+      <section class="panel charts-panel">
+        <div class="panel-heading chart-heading">
+          <div><h2>实时曲线</h2><p class="subheading">50 Hz 数据流 · 橙色区域为匀速段</p></div>
+          <div class="chart-actions"><label class="inline-field">窗口 <input id="windowInput" type="number" min="10" max="300" step="10" value="60"> s</label><button id="clearBtn" class="button ghost">清除曲线</button></div>
+        </div>
+        <div class="chart-block"><div class="chart-label"><span>拉力 F<sub>t</sub> / N</span><span id="forceRange">--</span></div><canvas id="forceChart"></canvas></div>
+        <div class="chart-block"><div class="chart-label"><span>位置 / mm　速度 / mm/s</span><span id="sampleRate">0.0 Hz</span></div><canvas id="motionChart"></canvas></div>
+      </section>
+
+      <section class="bottom-grid">
+        <section class="panel record-panel">
+          <div class="panel-heading"><h2>数据记录</h2><span id="recordState" class="badge muted-badge">未记录</span></div>
+          <div class="record-controls"><input id="runNote" type="text" placeholder="实验编号 / 金属种类 / 温度备注"><button id="recordBtn" class="button primary">开始记录</button><button id="exportBtn" class="button outline">导出 CSV</button></div>
+          <div class="record-stats"><span>样本 <strong id="sampleCount">0</strong></span><span>匀速样本 <strong id="steadyCount">0</strong></span><span>串口行 <strong id="lineCount">0</strong></span></div>
+        </section>
+        <section class="panel log-panel"><div class="panel-heading"><h2>串口日志</h2><button id="clearLogBtn" class="text-button">清空</button></div><pre id="logBox" aria-live="polite"></pre><div class="raw-command"><input id="rawCommand" type="text" placeholder="输入 STATUS、HELP 等原始命令"><button id="sendRawBtn" class="button outline">发送</button></div></section>
+      </section>
+    </section>
+  </main>
+  <footer><span>冰-金属摩擦实验控制台</span><span>Web Serial · 115200 baud · 8N1</span></footer>
+  <script src="app.js"></script>
+</body>
+</html>

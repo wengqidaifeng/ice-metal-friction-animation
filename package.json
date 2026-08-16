@@ -1,0 +1,36 @@
+{
+  "name": "ice-metal-friction-console",
+  "version": "1.0.0",
+  "description": "ESP32 ice-metal friction experiment serial console",
+  "main": "desktop/main.js",
+  "author": "物理实验设计竞赛项目组",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "cn.physicscompetition.icefriction",
+    "productName": "冰金属摩擦实验控制台",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "desktop/**/*",
+      "slider-console/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    }
+  }
+}
