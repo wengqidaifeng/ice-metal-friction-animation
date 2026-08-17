@@ -81,24 +81,79 @@
         <p class="help danger-help">软件急停通过串口发送指令，不等同于断电式实体急停。最终装置应保留独立硬件急停。</p>
       </section>
 
-      <section class="panel calibration-panel">
-        <div class="panel-heading"><h2>拉力传感器</h2><span id="calState" class="badge muted-badge">未标定</span></div>
-        <div class="button-grid two">
-          <button class="button outline" data-command="TARE">去皮 TARE</button>
-          <button id="calBtn" class="button outline">质量标定 CAL</button>
-        </div>
-        <p class="help">标定前卸下金属块，去皮后悬挂已知质量，再点击 CAL。固件当前将标定值保存在 RAM，重启后需重新确认。</p>
-      </section>
     </aside>
 
     <section class="content">
       <section class="metrics-grid">
         <div class="metric"><span>当前位置</span><strong id="positionMetric">0.000</strong><em>mm</em></div>
         <div class="metric"><span>实际速度</span><strong id="speedMetric">0.000</strong><em>mm/s</em></div>
-        <div class="metric accent"><span>当前拉力 F<sub>t</sub></span><strong id="forceMetric">--</strong><em>N</em></div>
+        <div class="metric accent"><span>当前拉力 F<sub>t</sub></span><strong id="forceMetric">--</strong><em id="forceUnitMetric">N</em></div>
         <div class="metric accent"><span>瞬时摩擦系数 μ</span><strong id="muMetric">--</strong><em>无量纲</em></div>
         <div class="metric"><span>匀速段平均 μ<sub>k</sub></span><strong id="muKMetric">--</strong><em>steady</em></div>
         <div class="metric"><span>启动峰值 μ<sub>s</sub></span><strong id="muSMetric">--</strong><em>峰值</em></div>
+      </section>
+
+      <section class="panel sensor-console-panel">
+        <div class="panel-heading sensor-heading">
+          <div><h2>拉力传感器调试</h2><p class="subheading">S 型传感器 · HX711 · 原始数据保留</p></div>
+          <div class="sensor-badges"><span id="sensorDataState" class="badge muted-badge">等待数据</span><span id="calState" class="badge muted-badge">未标定</span><span id="sensorStabilityState" class="badge muted-badge">待判断</span></div>
+        </div>
+
+        <div class="sensor-workbench">
+          <section class="sensor-section calibration-section">
+            <h3>两步标定</h3>
+            <label class="compact-field">已知质量
+              <div class="input-with-unit"><input id="calMassInput" type="number" min="1" max="50000" step="1" value="500"><em>g</em></div>
+            </label>
+            <div class="sensor-button-row">
+              <button id="tareBtn" class="button outline">1 空载去皮</button>
+              <button id="calBtn" class="button primary">2 加载标定</button>
+            </div>
+            <dl class="sensor-detail-list">
+              <div><dt>标定系数</dt><dd id="calScaleValue">-- raw/N</dd></div>
+              <div><dt>标定载荷</dt><dd id="calKnownForce">-- N</dd></div>
+            </dl>
+          </section>
+
+          <section class="sensor-section processing-section">
+            <h3>信号处理</h3>
+            <div class="sensor-settings-grid">
+              <label class="compact-field">显示单位<select id="forceUnitSelect"><option value="N">N</option><option value="gf">gf</option><option value="kgf">kgf</option></select></label>
+              <label class="compact-field">滤波方式<select id="filterModeSelect"><option value="raw">原始值</option><option value="mean" selected>滑动平均</option><option value="median">中值滤波</option></select></label>
+              <label class="compact-field">滤波点数 / 点<input id="filterWindowInput" type="number" min="1" max="50" step="1" value="5"></label>
+              <label class="compact-field">统计窗口 / s<input id="statsWindowInput" type="number" min="0.5" max="10" step="0.5" value="2"></label>
+              <label class="compact-field">稳定阈值 / N<input id="stabilityThresholdInput" type="number" min="0.001" max="5" step="0.001" value="0.01"></label>
+              <label class="compact-field">过载阈值 / N <span>0=关闭</span><input id="overloadThresholdInput" type="number" min="0" max="10000" step="0.1" value="0"></label>
+            </div>
+            <label class="check-field"><input id="invertForceInput" type="checkbox"><span>反转力值符号，使受拉方向显示为正值</span></label>
+          </section>
+
+          <section class="sensor-section diagnostics-section">
+            <h3>实时诊断</h3>
+            <div class="sensor-diagnostics-grid">
+              <div><span>ESP32 原始力</span><strong id="sensorRawForce">--</strong><em id="sensorRawUnit">N</em></div>
+              <div class="featured"><span>处理后力值</span><strong id="sensorProcessedForce">--</strong><em id="sensorProcessedUnit">N</em></div>
+              <div><span>窗口均值</span><strong id="sensorMeanForce">--</strong><em id="sensorMeanUnit">N</em></div>
+              <div><span>标准差 σ</span><strong id="sensorStdForce">--</strong><em id="sensorStdUnit">N</em></div>
+              <div><span>峰峰值</span><strong id="sensorPeakToPeak">--</strong><em id="sensorPeakUnit">N</em></div>
+              <div><span>最小 / 最大</span><strong id="sensorMinMax">--</strong><em id="sensorMinMaxUnit">N</em></div>
+            </div>
+            <div class="sensor-status-line"><span>采样率 <strong id="sensorSampleRate">0.0 Hz</strong></span><span>本地零点 <strong id="sensorLocalZero">0.0000 N</strong></span><span id="sensorAlarmText">过载监测关闭</span></div>
+          </section>
+        </div>
+
+        <div class="sensor-action-bar">
+          <button id="captureForceBtn" class="button outline">单次抓取</button>
+          <button id="freezeSensorBtn" class="button outline">冻结读数</button>
+          <button id="localZeroBtn" class="button outline">本地置零</button>
+          <button id="clearLocalZeroBtn" class="button outline">清除本地零点</button>
+          <button id="resetSensorStatsBtn" class="button outline">清空统计</button>
+        </div>
+
+        <div class="sensor-snapshot-wrap">
+          <div class="sensor-snapshot-heading"><h3>单次抓取记录</h3><button id="clearSnapshotsBtn" class="text-button">清空</button></div>
+          <div class="sensor-table-scroll"><table class="sensor-table"><thead><tr><th>时间</th><th>原始力 / N</th><th>处理后力值</th><th>σ / N</th><th>状态</th></tr></thead><tbody id="sensorSnapshotBody"><tr class="empty-row"><td colspan="5">暂无抓取记录</td></tr></tbody></table></div>
+        </div>
       </section>
 
       <section class="panel charts-panel">
@@ -106,7 +161,7 @@
           <div><h2>实时曲线</h2><p class="subheading">50 Hz 数据流 · 橙色区域为匀速段</p></div>
           <div class="chart-actions"><label class="inline-field">窗口 <input id="windowInput" type="number" min="10" max="300" step="10" value="60"> s</label><button id="clearBtn" class="button ghost">清除曲线</button></div>
         </div>
-        <div class="chart-block"><div class="chart-label"><span>拉力 F<sub>t</sub> / N</span><span id="forceRange">--</span></div><canvas id="forceChart"></canvas></div>
+        <div class="chart-block"><div class="chart-label"><span id="forceChartLabel">拉力 F<sub>t</sub> / N</span><span id="forceRange">--</span></div><canvas id="forceChart"></canvas></div>
         <div class="chart-block"><div class="chart-label"><span>位置 / mm　速度 / mm/s</span><span id="sampleRate">0.0 Hz</span></div><canvas id="motionChart"></canvas></div>
       </section>
 

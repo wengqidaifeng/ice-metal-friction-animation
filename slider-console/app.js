@@ -5,16 +5,21 @@
   const els = {
     connectBtn: $("connectBtn"), demoBtn: $("demoBtn"), connectionDot: $("connectionDot"), connectionText: $("connectionText"), connectionMode: $("connectionMode"), serialPort: $("serialPortSelect"), wifiUrl: $("wifiUrlInput"), portText: $("portText"), stateBadge: $("stateBadge"),
     position: $("positionMetric"), speed: $("speedMetric"), force: $("forceMetric"), mu: $("muMetric"), muK: $("muKMetric"), muS: $("muSMetric"), calState: $("calState"),
-    mass: $("massInput"), window: $("windowInput"), forceChart: $("forceChart"), motionChart: $("motionChart"), forceRange: $("forceRange"), sampleRate: $("sampleRate"),
+    mass: $("massInput"), window: $("windowInput"), forceChart: $("forceChart"), motionChart: $("motionChart"), forceRange: $("forceRange"), sampleRate: $("sampleRate"), forceUnitMetric: $("forceUnitMetric"), forceChartLabel: $("forceChartLabel"),
     recordBtn: $("recordBtn"), recordState: $("recordState"), exportBtn: $("exportBtn"), clearBtn: $("clearBtn"), clearLogBtn: $("clearLogBtn"), logBox: $("logBox"),
     sampleCount: $("sampleCount"), steadyCount: $("steadyCount"), lineCount: $("lineCount"), runNote: $("runNote"), calBtn: $("calBtn"), homeBtn: $("homeBtn"),
     stepsPerMm: $("stepsPerMm"), rawCommand: $("rawCommand"), sendRawBtn: $("sendRawBtn"), distance: $("distanceInput"),
-    directionPositive: $("directionPositive"), directionNegative: $("directionNegative"), directionJogBtn: $("directionJogBtn"), directionRunBtn: $("directionRunBtn"), motionCommandPreview: $("motionCommandPreview")
+    directionPositive: $("directionPositive"), directionNegative: $("directionNegative"), directionJogBtn: $("directionJogBtn"), directionRunBtn: $("directionRunBtn"), motionCommandPreview: $("motionCommandPreview"),
+    sensorDataState: $("sensorDataState"), sensorStabilityState: $("sensorStabilityState"), calMass: $("calMassInput"), tareBtn: $("tareBtn"), calScale: $("calScaleValue"), calKnownForce: $("calKnownForce"),
+    forceUnitSelect: $("forceUnitSelect"), filterModeSelect: $("filterModeSelect"), filterWindow: $("filterWindowInput"), statsWindow: $("statsWindowInput"), stabilityThreshold: $("stabilityThresholdInput"), overloadThreshold: $("overloadThresholdInput"), invertForce: $("invertForceInput"),
+    sensorRawForce: $("sensorRawForce"), sensorProcessedForce: $("sensorProcessedForce"), sensorMeanForce: $("sensorMeanForce"), sensorStdForce: $("sensorStdForce"), sensorPeakToPeak: $("sensorPeakToPeak"), sensorMinMax: $("sensorMinMax"), sensorSampleRate: $("sensorSampleRate"), sensorLocalZero: $("sensorLocalZero"), sensorAlarmText: $("sensorAlarmText"),
+    captureForceBtn: $("captureForceBtn"), freezeSensorBtn: $("freezeSensorBtn"), localZeroBtn: $("localZeroBtn"), clearLocalZeroBtn: $("clearLocalZeroBtn"), resetSensorStatsBtn: $("resetSensorStatsBtn"), clearSnapshotsBtn: $("clearSnapshotsBtn"), sensorSnapshotBody: $("sensorSnapshotBody")
   };
 
   const state = {
     port: null, reader: null, writer: null, readBuffer: "", connected: false, transport: "serial", wifiBaseUrl: "http://192.168.4.1", wifiTimer: null, wifiSeq: 0, wifiErrorShown: false, demo: false, demoTimer: null,
-    samples: [], recordRows: [], recording: false, steadyForces: [], peakForce: null, lastDeviceMs: null, rateTimes: [], currentState: "IDLE", lineCount: 0, motionDirection: 1
+    samples: [], recordRows: [], recording: false, steadyForces: [], peakForce: null, lastDeviceMs: null, rateTimes: [], currentState: "IDLE", lineCount: 0, motionDirection: 1,
+    sensor: { unit: "N", filterMode: "mean", filterWindow: 5, statsWindowSec: 2, stabilityThresholdN: 0.01, overloadThresholdN: 0, invert: false, localZeroN: 0, frozen: false, calibrated: false, scaleRawPerN: null, knownForceN: null, history: [], snapshots: [], latest: null, stats: null }
   };
   const encoder = new TextEncoder();
 
@@ -60,14 +65,131 @@
     state.motionDirection = Number(direction) < 0 ? -1 : 1;
     updateDirectionControls();
   }
+  const GRAVITY = 9.80665;
+  const SENSOR_SETTINGS_KEY = "iceFriction.sensorSettings.v1";
+  function unitFactor(unit = state.sensor.unit) { return unit === "gf" ? 1000 / GRAVITY : unit === "kgf" ? 1 / GRAVITY : 1; }
+  function unitDigits(unit = state.sensor.unit) { return unit === "gf" ? 2 : 4; }
+  function displayForce(valueN) { return Number.isFinite(valueN) ? valueN * unitFactor() : null; }
+  function forceText(valueN, digits = unitDigits()) { const value = displayForce(valueN); return Number.isFinite(value) ? value.toFixed(digits) : "--"; }
+  function median(values) { const sorted = [...values].sort((a, b) => a - b); const middle = Math.floor(sorted.length / 2); return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2; }
+  function clamp(value, min, max, fallback) { return Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback; }
+  function setCalibrationStatus(calibrated) {
+    state.sensor.calibrated = Boolean(calibrated);
+    els.calState.textContent = state.sensor.calibrated ? "已标定" : "未标定";
+    els.calState.className = `badge ${state.sensor.calibrated ? "running" : "muted-badge"}`;
+  }
+  function updateForceUnits() {
+    const unit = state.sensor.unit;
+    els.forceUnitMetric.textContent = unit;
+    els.forceChartLabel.textContent = `拉力 Ft / ${unit}`;
+    ["sensorRawUnit", "sensorProcessedUnit", "sensorMeanUnit", "sensorStdUnit", "sensorPeakUnit", "sensorMinMaxUnit"].forEach((id) => { $(id).textContent = unit; });
+  }
+  function saveSensorSettings() {
+    const settings = { unit: state.sensor.unit, filterMode: state.sensor.filterMode, filterWindow: state.sensor.filterWindow, statsWindowSec: state.sensor.statsWindowSec, stabilityThresholdN: state.sensor.stabilityThresholdN, overloadThresholdN: state.sensor.overloadThresholdN, invert: state.sensor.invert };
+    try { localStorage.setItem(SENSOR_SETTINGS_KEY, JSON.stringify(settings)); } catch (_) { /* storage may be unavailable */ }
+  }
+  function loadSensorSettings() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(SENSOR_SETTINGS_KEY) || "null");
+      if (saved && typeof saved === "object") Object.assign(state.sensor, saved);
+    } catch (_) { /* keep defaults */ }
+    if (!["N", "gf", "kgf"].includes(state.sensor.unit)) state.sensor.unit = "N";
+    if (!["raw", "mean", "median"].includes(state.sensor.filterMode)) state.sensor.filterMode = "mean";
+    state.sensor.filterWindow = Math.round(clamp(Number(state.sensor.filterWindow), 1, 50, 5));
+    state.sensor.statsWindowSec = clamp(Number(state.sensor.statsWindowSec), 0.5, 10, 2);
+    state.sensor.stabilityThresholdN = clamp(Number(state.sensor.stabilityThresholdN), 0.001, 5, 0.01);
+    state.sensor.overloadThresholdN = clamp(Number(state.sensor.overloadThresholdN), 0, 10000, 0);
+    state.sensor.invert = Boolean(state.sensor.invert);
+    els.forceUnitSelect.value = state.sensor.unit;
+    els.filterModeSelect.value = state.sensor.filterMode;
+    els.filterWindow.value = state.sensor.filterWindow;
+    els.statsWindow.value = state.sensor.statsWindowSec;
+    els.stabilityThreshold.value = state.sensor.stabilityThresholdN;
+    els.overloadThreshold.value = state.sensor.overloadThresholdN;
+    els.invertForce.checked = state.sensor.invert;
+    updateForceUnits();
+  }
+  function syncSensorSettings() {
+    const invertChanged = state.sensor.invert !== els.invertForce.checked;
+    state.sensor.unit = els.forceUnitSelect.value;
+    state.sensor.filterMode = els.filterModeSelect.value;
+    state.sensor.filterWindow = Math.round(clamp(Number(els.filterWindow.value), 1, 50, 5));
+    state.sensor.statsWindowSec = clamp(Number(els.statsWindow.value), 0.5, 10, 2);
+    state.sensor.stabilityThresholdN = clamp(Number(els.stabilityThreshold.value), 0.001, 5, 0.01);
+    state.sensor.overloadThresholdN = clamp(Number(els.overloadThreshold.value), 0, 10000, 0);
+    state.sensor.invert = els.invertForce.checked;
+    if (invertChanged) { state.sensor.localZeroN = 0; state.sensor.history = []; }
+    saveSensorSettings();
+    updateForceUnits();
+    refreshSensorPresentation();
+    renderSensorSnapshots();
+    drawCharts();
+  }
+  function resetSensorHistory() {
+    state.sensor.history = [];
+    state.sensor.stats = null;
+    state.sensor.latest = null;
+    refreshSensorPresentation();
+  }
+  function processSensorForce(rawForceN, deviceMs) {
+    const signedRawN = (state.sensor.invert ? -1 : 1) * rawForceN;
+    const correctedN = signedRawN - state.sensor.localZeroN;
+    const history = state.sensor.history;
+    if (history.length && deviceMs < history[history.length - 1].deviceMs) history.length = 0;
+    history.push({ deviceMs, rawForceN, correctedN });
+    if (history.length > 1000) history.splice(0, history.length - 1000);
+
+    const filterValues = history.slice(-state.sensor.filterWindow).map((entry) => entry.correctedN);
+    let processedN = correctedN;
+    if (state.sensor.filterMode === "mean") processedN = filterValues.reduce((sum, value) => sum + value, 0) / filterValues.length;
+    else if (state.sensor.filterMode === "median") processedN = median(filterValues);
+
+    const cutoff = deviceMs - state.sensor.statsWindowSec * 1000;
+    const statsValues = history.filter((entry) => entry.deviceMs >= cutoff).map((entry) => entry.correctedN);
+    const meanN = statsValues.reduce((sum, value) => sum + value, 0) / statsValues.length;
+    const variance = statsValues.reduce((sum, value) => sum + (value - meanN) ** 2, 0) / statsValues.length;
+    const stdN = Math.sqrt(variance);
+    const minN = Math.min(...statsValues);
+    const maxN = Math.max(...statsValues);
+    const stable = statsValues.length >= 5 && stdN <= state.sensor.stabilityThresholdN;
+    const overloaded = state.sensor.overloadThresholdN > 0 && Math.abs(processedN) >= state.sensor.overloadThresholdN;
+    state.sensor.stats = { meanN, stdN, minN, maxN, peakToPeakN: maxN - minN, stable, overloaded, count: statsValues.length };
+    state.sensor.latest = { rawForceN, signedRawN, correctedN, processedN, deviceMs };
+    return { rawForceN, force: processedN, correctedForceN: correctedN, sensorStable: stable, sensorStdN: stdN };
+  }
+  function refreshSensorPresentation() {
+    const latest = state.sensor.latest;
+    const stats = state.sensor.stats;
+    els.sensorLocalZero.textContent = `${state.sensor.localZeroN.toFixed(4)} N`;
+    if (!latest || !stats) {
+      [els.sensorRawForce, els.sensorProcessedForce, els.sensorMeanForce, els.sensorStdForce, els.sensorPeakToPeak, els.sensorMinMax].forEach((element) => { element.textContent = "--"; });
+      els.sensorStabilityState.textContent = "待判断";
+      els.sensorStabilityState.className = "badge muted-badge";
+      els.sensorAlarmText.textContent = state.sensor.overloadThresholdN > 0 ? `阈值 ${state.sensor.overloadThresholdN.toFixed(2)} N` : "过载监测关闭";
+      els.sensorAlarmText.className = "";
+      return;
+    }
+    if (!state.sensor.frozen) {
+      els.sensorRawForce.textContent = forceText(latest.rawForceN);
+      els.sensorProcessedForce.textContent = forceText(latest.processedN);
+      els.sensorMeanForce.textContent = forceText(stats.meanN);
+      els.sensorStdForce.textContent = forceText(stats.stdN);
+      els.sensorPeakToPeak.textContent = forceText(stats.peakToPeakN);
+      els.sensorMinMax.textContent = `${forceText(stats.minN)} / ${forceText(stats.maxN)}`;
+    }
+    els.sensorStabilityState.textContent = state.sensor.frozen ? "显示冻结" : stats.stable ? "稳定" : "波动";
+    els.sensorStabilityState.className = `badge ${state.sensor.frozen ? "muted-badge" : stats.stable ? "running" : "idle"}`;
+    els.sensorAlarmText.textContent = stats.overloaded ? "超过设定阈值" : state.sensor.overloadThresholdN > 0 ? `阈值 ${state.sensor.overloadThresholdN.toFixed(2)} N` : "过载监测关闭";
+    els.sensorAlarmText.className = stats.overloaded ? "alarm" : "";
+  }
   function massKg() { return Math.max(0, Number(els.mass.value) || 0) / 1000; }
-  function calculateMu(force) { const m = massKg(); return Number.isFinite(force) && m > 0 ? force / (m * 9.80665) : null; }
+  function calculateMu(force) { const m = massKg(); return Number.isFinite(force) && m > 0 ? force / (m * GRAVITY) : null; }
   function updateMetrics(sample) {
     els.position.textContent = numeric(sample.position);
     els.speed.textContent = numeric(Math.abs(sample.speed));
-    els.force.textContent = numeric(sample.force, 4);
+    if (!state.sensor.frozen) els.force.textContent = forceText(sample.force);
     const mu = calculateMu(sample.force);
-    els.mu.textContent = numeric(mu, 4);
+    if (!state.sensor.frozen) els.mu.textContent = numeric(mu, 4);
     if (sample.force !== null) {
       state.peakForce = state.peakForce === null ? sample.force : Math.max(state.peakForce, sample.force);
       if (sample.steady) state.steadyForces.push(sample.force);
@@ -75,25 +197,30 @@
     const mean = state.steadyForces.length ? state.steadyForces.reduce((a, b) => a + b, 0) / state.steadyForces.length : null;
     els.muK.textContent = numeric(calculateMu(mean), 4);
     els.muS.textContent = numeric(calculateMu(state.peakForce), 4);
-    els.calState.textContent = sample.force !== null ? "有力值" : "未标定";
-    els.calState.className = `badge ${sample.force !== null ? "running" : "muted-badge"}`;
+    refreshSensorPresentation();
   }
   function parseData(parts, raw) {
     if (parts.length < 7) return;
     const forceText = String(parts[4]);
-    const sample = { deviceMs: Number(parts[1]), position: Number(parts[2]), speed: Number(parts[3]), force: forceText.toLowerCase() === "nan" ? null : Number(forceText), steady: String(parts[5]) === "1", state: String(parts[6] || "IDLE"), pcTime: new Date().toISOString(), raw };
+    const rawForceN = forceText.toLowerCase() === "nan" ? null : Number(forceText);
+    const processed = Number.isFinite(rawForceN) ? processSensorForce(rawForceN, Number(parts[1])) : { rawForceN: null, force: null, correctedForceN: null, sensorStable: false, sensorStdN: null };
+    const sample = { deviceMs: Number(parts[1]), position: Number(parts[2]), speed: Number(parts[3]), ...processed, steady: String(parts[5]) === "1", state: String(parts[6] || "IDLE"), pcTime: new Date().toISOString(), raw };
     if (!Number.isFinite(sample.position) || !Number.isFinite(sample.speed)) return;
+    els.sensorDataState.textContent = sample.force === null ? "无有效力值" : "数据有效";
+    els.sensorDataState.className = `badge ${sample.force === null ? "muted-badge" : "running"}`;
     state.samples.push(sample);
     const windowMs = (Math.max(10, Number(els.window.value) || 60)) * 1000;
     const newest = sample.deviceMs;
     state.samples = state.samples.filter((item) => newest - item.deviceMs <= windowMs);
-    if (state.recording) state.recordRows.push({ ...sample, massG: Number(els.mass.value) || 0, mu: calculateMu(sample.force), note: els.runNote.value });
+    if (state.recording) state.recordRows.push({ ...sample, massG: Number(els.mass.value) || 0, mu: calculateMu(sample.force), localZeroN: state.sensor.localZeroN, filterMode: state.sensor.filterMode, filterWindow: state.sensor.filterWindow, invertForce: state.sensor.invert, statsWindowSec: state.sensor.statsWindowSec, stabilityThresholdN: state.sensor.stabilityThresholdN, note: els.runNote.value });
     updateMetrics(sample);
     setBadge(sample.state);
     if (state.lastDeviceMs !== null && sample.deviceMs > state.lastDeviceMs) {
       state.rateTimes.push(performance.now());
       state.rateTimes = state.rateTimes.filter((t) => performance.now() - t < 2000);
-      els.sampleRate.textContent = `${(state.rateTimes.length / 2).toFixed(1)} Hz`;
+      const rate = state.rateTimes.length / 2;
+      els.sampleRate.textContent = `${rate.toFixed(1)} Hz`;
+      els.sensorSampleRate.textContent = `${rate.toFixed(1)} Hz`;
     }
     state.lastDeviceMs = sample.deviceMs;
     refreshCounters();
@@ -109,7 +236,19 @@
     else {
       log(line, line.startsWith("ERR,") || line.startsWith("FAULT,") ? "error" : "info");
       if (line.startsWith("FAULT,")) setBadge("FAULT");
-      if (line.includes("OK,CAL")) { els.calState.textContent = "已标定"; els.calState.className = "badge running"; }
+      if (line.startsWith("OK,TARE")) {
+        setCalibrationStatus(false); state.sensor.scaleRawPerN = null; state.sensor.knownForceN = null; els.calScale.textContent = "-- raw/N"; els.calKnownForce.textContent = "-- N"; resetSensorHistory();
+      }
+      if (line.startsWith("OK,CAL")) {
+        const scaleMatch = line.match(/scale_raw_per_N=([-+\d.eE]+)/);
+        const forceMatch = line.match(/known_N=([-+\d.eE]+)/);
+        state.sensor.scaleRawPerN = scaleMatch ? Number(scaleMatch[1]) : null;
+        state.sensor.knownForceN = forceMatch ? Number(forceMatch[1]) : null;
+        els.calScale.textContent = Number.isFinite(state.sensor.scaleRawPerN) ? `${state.sensor.scaleRawPerN.toFixed(3)} raw/N` : "已由固件设置";
+        els.calKnownForce.textContent = Number.isFinite(state.sensor.knownForceN) ? `${state.sensor.knownForceN.toFixed(4)} N` : "-- N";
+        setCalibrationStatus(true);
+      }
+      if (line.includes("HX711_NOT_READY")) { els.sensorDataState.textContent = "HX711 未就绪"; els.sensorDataState.className = "badge fault"; }
     }
   }
   function parseStatus(line) {
@@ -122,7 +261,7 @@
     if (values.distance_mm) { $("distanceInput").value = Number(values.distance_mm); updateDirectionControls(); }
     if (values.accel_mm_s2) $("accelInput").value = Number(values.accel_mm_s2);
     if (values.steps_per_mm) els.stepsPerMm.textContent = `${Number(values.steps_per_mm).toFixed(1)} step/mm`;
-    if (values.cal === "1") { els.calState.textContent = "已标定"; els.calState.className = "badge running"; }
+    if (values.cal !== undefined) setCalibrationStatus(values.cal === "1");
     updateSafety(values.limits_installed === "1", values.home === "1", values.far === "1", values.estop_installed === "1", values.estop === "1");
     log(line);
   }
@@ -145,7 +284,7 @@
     if (status.distance_mm !== undefined) { $("distanceInput").value = Number(status.distance_mm); updateDirectionControls(); }
     if (status.accel_mm_s2 !== undefined) $("accelInput").value = Number(status.accel_mm_s2);
     if (status.steps_per_mm !== undefined) els.stepsPerMm.textContent = `${Number(status.steps_per_mm).toFixed(1)} step/mm`;
-    if (status.calibrated) { els.calState.textContent = "已标定"; els.calState.className = "badge running"; }
+    if (status.calibrated !== undefined) setCalibrationStatus(Boolean(status.calibrated));
     updateSafety(Boolean(status.home_installed), Boolean(status.home_active), Boolean(status.far_active), Boolean(status.estop_installed), Boolean(status.estop_active));
   }
   async function pollWifi() {
@@ -241,7 +380,9 @@
       try {
         const response = await fetch(`${state.wifiBaseUrl}/api/command`, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `cmd=${encodeURIComponent(command.trim())}` });
         const result = await response.json();
-        log(result.message || (response.ok ? "OK" : "请求失败"), response.ok ? "info" : "error");
+        const message = result.message || (response.ok ? "OK" : "请求失败");
+        if (/^(OK|ERR|FAULT|STATUS),/.test(message)) handleLine(message);
+        else log(message, response.ok ? "info" : "error");
       } catch (error) { log(`Wi-Fi 命令失败：${error.message}`, "error"); }
       return;
     }
@@ -258,7 +399,12 @@
     els.sampleCount.textContent = state.recordRows.length;
     els.steadyCount.textContent = state.recordRows.filter((row) => row.steady).length;
   }
-  function clearData() { state.samples = []; state.recordRows = []; state.steadyForces = []; state.peakForce = null; state.lastDeviceMs = null; state.rateTimes = []; refreshCounters(); updateMetrics({ position: 0, speed: 0, force: null, steady: false }); drawCharts(); }
+  function clearData() {
+    state.samples = []; state.recordRows = []; state.steadyForces = []; state.peakForce = null; state.lastDeviceMs = null; state.rateTimes = [];
+    resetSensorHistory(); state.sensor.snapshots = []; renderSensorSnapshots();
+    els.sensorDataState.textContent = "等待数据"; els.sensorDataState.className = "badge muted-badge"; els.sensorSampleRate.textContent = "0.0 Hz";
+    refreshCounters(); updateMetrics({ position: 0, speed: 0, force: null, steady: false }); drawCharts();
+  }
   function toggleRecording() {
     state.recording = !state.recording;
     els.recordBtn.textContent = state.recording ? "停止记录" : "开始记录";
@@ -270,12 +416,37 @@
   }
   function exportCsv() {
     if (!state.recordRows.length) { log("没有可导出的记录数据。", "error"); return; }
-    const header = ["pc_time_iso", "device_time_ms", "position_mm", "speed_mm_s", "force_N", "steady", "state", "mass_g", "mu", "note", "raw_line"];
-    const csvRows = [header, ...state.recordRows.map((row) => [row.pcTime, row.deviceMs, row.position.toFixed(5), row.speed.toFixed(5), row.force === null ? "" : row.force.toFixed(6), row.steady ? 1 : 0, row.state, row.massG, row.mu === null ? "" : row.mu.toFixed(6), row.note, row.raw])];
+    const header = ["pc_time_iso", "device_time_ms", "position_mm", "speed_mm_s", "force_N", "processed_force_N", "sensor_stable", "sensor_std_N", "local_zero_N", "invert_force", "filter_mode", "filter_window", "stats_window_s", "stability_threshold_N", "steady", "state", "mass_g", "mu", "note", "raw_line"];
+    const csvRows = [header, ...state.recordRows.map((row) => [row.pcTime, row.deviceMs, row.position.toFixed(5), row.speed.toFixed(5), row.rawForceN === null ? "" : row.rawForceN.toFixed(6), row.force === null ? "" : row.force.toFixed(6), row.sensorStable ? 1 : 0, row.sensorStdN === null ? "" : row.sensorStdN.toFixed(6), row.localZeroN.toFixed(6), row.invertForce ? 1 : 0, row.filterMode, row.filterWindow, row.statsWindowSec, row.stabilityThresholdN, row.steady ? 1 : 0, row.state, row.massG, row.mu === null ? "" : row.mu.toFixed(6), row.note, row.raw])];
     const csv = "\ufeff" + csvRows.map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\r\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `ice_friction_${new Date().toISOString().replaceAll(/[:.]/g, "-")}.csv`; a.click(); URL.revokeObjectURL(a.href);
     log(`已导出 ${state.recordRows.length} 条 CSV 数据`);
+  }
+  function renderSensorSnapshots() {
+    if (!state.sensor.snapshots.length) { els.sensorSnapshotBody.innerHTML = '<tr class="empty-row"><td colspan="5">暂无抓取记录</td></tr>'; return; }
+    els.sensorSnapshotBody.innerHTML = state.sensor.snapshots.map((snapshot) => `<tr><td>${snapshot.time}</td><td>${snapshot.rawForceN.toFixed(5)}</td><td>${forceText(snapshot.processedN)} ${state.sensor.unit}</td><td>${snapshot.stdN.toFixed(5)}</td><td>${snapshot.stable ? "稳定" : "波动"}</td></tr>`).join("");
+  }
+  function captureSensorSnapshot() {
+    const latest = state.sensor.latest, stats = state.sensor.stats;
+    if (!latest || !stats) { log("当前没有可抓取的有效力值。", "error"); return; }
+    state.sensor.snapshots.unshift({ time: new Date().toLocaleTimeString("zh-CN", { hour12: false }), rawForceN: latest.rawForceN, processedN: latest.processedN, stdN: stats.stdN, stable: stats.stable });
+    state.sensor.snapshots = state.sensor.snapshots.slice(0, 20);
+    renderSensorSnapshots(); log(`已抓取力值 ${latest.processedN.toFixed(5)} N`);
+  }
+  function setLocalZeroFromLatest() {
+    const latest = state.sensor.latest;
+    if (!latest) { log("当前没有有效力值，无法本地置零。", "error"); return; }
+    state.sensor.localZeroN = latest.signedRawN;
+    state.sensor.history = []; state.sensor.stats = null; state.sensor.latest = null;
+    refreshSensorPresentation(); log(`本地零点设置为 ${state.sensor.localZeroN.toFixed(5)} N；ESP32 标定参数未改变。`);
+  }
+  function clearLocalZero() { state.sensor.localZeroN = 0; resetSensorHistory(); log("已清除上位机本地零点；ESP32 标定参数未改变。"); }
+  function toggleSensorFreeze() {
+    state.sensor.frozen = !state.sensor.frozen;
+    els.freezeSensorBtn.textContent = state.sensor.frozen ? "恢复读数" : "冻结读数";
+    refreshSensorPresentation();
+    log(state.sensor.frozen ? "传感器读数显示已冻结，后台采集和记录仍继续。" : "传感器读数显示已恢复。");
   }
   function drawAxes(ctx, width, height, left, top, right, bottom, minX, maxX, minY, maxY, yLabel) {
     ctx.strokeStyle = "#dbe3e8"; ctx.lineWidth = 1; ctx.fillStyle = "#71808c"; ctx.font = "11px Arial";
@@ -296,17 +467,17 @@
     if (yLabel.startsWith("拉力")) { ctx.fillStyle = "#d87832"; ctx.font = "11px Microsoft YaHei"; ctx.fillText("steady", width - 55, 13); }
   }
   function drawCharts() {
-    drawSeries(els.forceChart, [{ color: "#176b87", get: (s) => s.force }, { color: "#d87832", get: (s) => s.steady && s.force !== null ? s.force : NaN }], "拉力 / N");
+    drawSeries(els.forceChart, [{ color: "#176b87", get: (s) => displayForce(s.force) }, { color: "#d87832", get: (s) => s.steady && s.force !== null ? displayForce(s.force) : NaN }], `拉力 / ${state.sensor.unit}`);
     drawSeries(els.motionChart, [{ color: "#1a8a83", get: (s) => s.position }, { color: "#d87832", get: (s) => s.speed }], "位置 / 速度");
-    const forces = state.samples.map((s) => s.force).filter(Number.isFinite); els.forceRange.textContent = forces.length ? `${Math.min(...forces).toFixed(3)} – ${Math.max(...forces).toFixed(3)} N` : "--";
+    const forces = state.samples.map((s) => displayForce(s.force)).filter(Number.isFinite); els.forceRange.textContent = forces.length ? `${Math.min(...forces).toFixed(unitDigits())} – ${Math.max(...forces).toFixed(unitDigits())} ${state.sensor.unit}` : "--";
   }
   function startDemo() {
     if (state.connected) return;
     state.demo = !state.demo;
     els.demoBtn.textContent = state.demo ? "停止模拟" : "模拟数据";
     setConnection(state.demo, state.demo ? "模拟模式" : "未连接", state.demo ? "虚拟 115200 8N1" : "115200 8N1");
-    if (state.demo) { log("模拟模式已开启，不会驱动真实滑台"); const started = performance.now(); state.demoTimer = setInterval(() => { const t = Math.round(performance.now() - started); const phase = (t % 6000) / 1000; const moving = phase > .6 && phase < 4.8; const speed = moving ? .2 : 0; const position = moving ? Math.min(20, (phase - .6) * .2) : phase >= 4.8 ? .84 : 0; const force = moving ? .55 + .025 * Math.sin(t / 170) : phase > .45 && phase < .7 ? .82 : null; parseData(["DATA", t, position, speed, force ?? "nan", moving && phase > 1 ? "1" : "0", moving ? "RUNNING" : "IDLE"], `DATA,${t},${position.toFixed(4)},${speed.toFixed(4)},${force === null ? "nan" : force.toFixed(5)},${moving && phase > 1 ? 1 : 0},${moving ? "RUNNING" : "IDLE"}`); }, 20); }
-    else { clearInterval(state.demoTimer); state.demoTimer = null; log("模拟模式已停止"); }
+    if (state.demo) { setCalibrationStatus(true); els.calScale.textContent = "模拟数据"; log("模拟模式已开启，不会驱动真实滑台"); const started = performance.now(); state.demoTimer = setInterval(() => { const t = Math.round(performance.now() - started); const phase = (t % 6000) / 1000; const moving = phase > .6 && phase < 4.8; const speed = moving ? .2 : 0; const position = moving ? Math.min(20, (phase - .6) * .2) : phase >= 4.8 ? .84 : 0; const force = moving ? .55 + .025 * Math.sin(t / 170) + .004 * Math.sin(t / 23) : phase > .45 && phase < .7 ? .82 : .003 * Math.sin(t / 31); parseData(["DATA", t, position, speed, force, moving && phase > 1 ? "1" : "0", moving ? "RUNNING" : "IDLE"], `DATA,${t},${position.toFixed(4)},${speed.toFixed(4)},${force.toFixed(5)},${moving && phase > 1 ? 1 : 0},${moving ? "RUNNING" : "IDLE"}`); }, 20); }
+    else { clearInterval(state.demoTimer); state.demoTimer = null; setCalibrationStatus(false); els.calScale.textContent = "-- raw/N"; log("模拟模式已停止"); }
   }
   document.querySelectorAll("[data-command]").forEach((button) => button.addEventListener("click", async () => {
     if (button.dataset.input) return;
@@ -334,7 +505,25 @@
     sendCommand(`JOG ${formatDistance(signedDistance(distance))}`);
   });
   els.distance.addEventListener("input", updateDirectionControls);
-  els.calBtn.addEventListener("click", () => { const grams = prompt("请输入已知标定质量（g），例如 200：", "200"); const value = Number(grams); if (Number.isFinite(value) && value > 0) sendCommand(`CAL ${value}`); });
+  els.tareBtn.addEventListener("click", () => {
+    if (!confirm("确认传感器已经完全卸载且无外力？TARE 会清除当前 ESP32 标定状态，之后需要重新加载已知质量完成标定。")) return;
+    if (state.demo) { setCalibrationStatus(false); state.sensor.history = []; state.sensor.latest = null; state.sensor.stats = null; els.calScale.textContent = "-- raw/N"; refreshSensorPresentation(); }
+    sendCommand("TARE");
+  });
+  els.calBtn.addEventListener("click", () => {
+    const grams = Number(els.calMass.value);
+    if (!Number.isFinite(grams) || grams < 1 || grams > 50000) { log("标定质量必须在 1–50000 g 之间。", "error"); els.calMass.focus(); return; }
+    if (state.demo) { const knownN = grams * GRAVITY / 1000; state.sensor.knownForceN = knownN; state.sensor.scaleRawPerN = 12345.678; els.calScale.textContent = "12345.678 raw/N"; els.calKnownForce.textContent = `${knownN.toFixed(4)} N`; setCalibrationStatus(true); }
+    sendCommand(`CAL ${grams}`);
+  });
+  [els.forceUnitSelect, els.filterModeSelect, els.invertForce].forEach((control) => control.addEventListener("change", syncSensorSettings));
+  [els.filterWindow, els.statsWindow, els.stabilityThreshold, els.overloadThreshold].forEach((control) => control.addEventListener("input", syncSensorSettings));
+  els.captureForceBtn.addEventListener("click", captureSensorSnapshot);
+  els.freezeSensorBtn.addEventListener("click", toggleSensorFreeze);
+  els.localZeroBtn.addEventListener("click", setLocalZeroFromLatest);
+  els.clearLocalZeroBtn.addEventListener("click", clearLocalZero);
+  els.resetSensorStatsBtn.addEventListener("click", () => { resetSensorHistory(); log("已清空传感器统计窗口。"); });
+  els.clearSnapshotsBtn.addEventListener("click", () => { state.sensor.snapshots = []; renderSensorSnapshots(); });
   async function connectTransport() { if (state.connected) { if (state.transport === "wifi") await disconnectWifi(); else await disconnectSerial(); return; } try { if (els.connectionMode.value === "wifi") await connectWifi(); else await connectSerial(); } catch (error) { log(`连接失败：${error.message}`, "error"); setConnection(false); } }
   async function refreshDesktopPorts() {
     if (!window.desktopSerial) return;
@@ -361,5 +550,7 @@
   els.sendRawBtn.addEventListener("click", () => { const command = els.rawCommand.value.trim(); if (command) { sendCommand(command); els.rawCommand.value = ""; } });
   els.rawCommand.addEventListener("keydown", (event) => { if (event.key === "Enter") els.sendRawBtn.click(); });
   window.addEventListener("resize", drawCharts); els.mass.addEventListener("input", () => { const latest = state.samples[state.samples.length - 1]; if (latest) updateMetrics(latest); });
-  setConnection(false); setBadge("IDLE"); updateDirectionControls(); drawCharts(); log("控制台已就绪。请连接 ESP32，或开启模拟数据检查界面。");
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.scrollTo(0, 0);
+  loadSensorSettings(); setCalibrationStatus(false); renderSensorSnapshots(); refreshSensorPresentation(); setConnection(false); setBadge("IDLE"); updateDirectionControls(); drawCharts(); log("控制台已就绪。请连接 ESP32，或开启模拟数据检查界面。");
 })();
