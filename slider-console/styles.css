@@ -51,6 +51,11 @@ h2 { font-size: 15px; color: var(--navy); }
 .input-with-unit:focus-within { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(23,107,135,.12); }
 input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--ink); background: transparent; padding: 8px 9px; }
 .input-with-unit em { padding-right: 9px; color: var(--muted); font-size: 11px; font-style: normal; white-space: nowrap; }
+.direction-field { margin-top: 12px; }
+.direction-selector { display: grid; grid-template-columns: 1fr 1fr; min-height: 36px; margin-top: 5px; padding: 2px; border: 1px solid #cbd7dd; border-radius: 5px; background: #eef2f4; }
+.direction-option { min-width: 0; border: 0; border-radius: 3px; color: var(--muted); background: transparent; font-weight: 600; }
+.direction-option.active { color: #fff; background: var(--teal); box-shadow: 0 1px 3px rgba(25, 35, 45, .14); }
+.direction-option[data-motion-direction="-1"].active { background: var(--orange); }
 .help { margin-top: 9px; line-height: 1.45; }
 .danger-help { color: #8c4e48; }
 .button { min-height: 34px; border: 1px solid transparent; border-radius: 4px; padding: 7px 11px; transition: background .15s, border-color .15s, opacity .15s; white-space: nowrap; }
@@ -67,6 +72,9 @@ input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--ink); bac
 .button.estop { width: 100%; margin-top: 10px; color: #fff; background: var(--red); border-color: var(--red); font-weight: 700; }
 .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .button-grid.two { grid-template-columns: 1fr 1fr; }
+.command-panel .button-grid .button { min-height: 40px; white-space: normal; }
+.command-preview { margin-top: 9px; padding: 7px 9px; border: 1px solid #d7e3e7; border-radius: 4px; color: var(--blue); background: #f4f9fa; font: 12px/1.4 Consolas, "Microsoft YaHei", monospace; }
+.command-preview.reverse { color: #92551f; border-color: #ead4b8; background: #fff8ef; }
 .metrics-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .metric { min-width: 0; padding: 13px 14px; background: #fff; border: 1px solid var(--line); border-radius: 7px; box-shadow: var(--shadow); }
 .metric span { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

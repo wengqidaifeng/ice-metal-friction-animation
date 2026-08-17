@@ -8,12 +8,13 @@
     mass: $("massInput"), window: $("windowInput"), forceChart: $("forceChart"), motionChart: $("motionChart"), forceRange: $("forceRange"), sampleRate: $("sampleRate"),
     recordBtn: $("recordBtn"), recordState: $("recordState"), exportBtn: $("exportBtn"), clearBtn: $("clearBtn"), clearLogBtn: $("clearLogBtn"), logBox: $("logBox"),
     sampleCount: $("sampleCount"), steadyCount: $("steadyCount"), lineCount: $("lineCount"), runNote: $("runNote"), calBtn: $("calBtn"), homeBtn: $("homeBtn"),
-    stepsPerMm: $("stepsPerMm"), rawCommand: $("rawCommand"), sendRawBtn: $("sendRawBtn")
+    stepsPerMm: $("stepsPerMm"), rawCommand: $("rawCommand"), sendRawBtn: $("sendRawBtn"), distance: $("distanceInput"),
+    directionPositive: $("directionPositive"), directionNegative: $("directionNegative"), directionJogBtn: $("directionJogBtn"), directionRunBtn: $("directionRunBtn"), motionCommandPreview: $("motionCommandPreview")
   };
 
   const state = {
     port: null, reader: null, writer: null, readBuffer: "", connected: false, transport: "serial", wifiBaseUrl: "http://192.168.4.1", wifiTimer: null, wifiSeq: 0, wifiErrorShown: false, demo: false, demoTimer: null,
-    samples: [], recordRows: [], recording: false, steadyForces: [], peakForce: null, lastDeviceMs: null, rateTimes: [], currentState: "IDLE", lineCount: 0
+    samples: [], recordRows: [], recording: false, steadyForces: [], peakForce: null, lastDeviceMs: null, rateTimes: [], currentState: "IDLE", lineCount: 0, motionDirection: 1
   };
   const encoder = new TextEncoder();
 
@@ -36,6 +37,29 @@
     els.stateBadge.className = `badge ${state.currentState === "FAULT" ? "fault" : state.currentState === "RUNNING" || state.currentState === "HOMING" ? "running" : "idle"}`;
   }
   function numeric(value, digits = 3) { return Number.isFinite(value) ? value.toFixed(digits) : "--"; }
+  function configuredDistance() {
+    const value = Number(els.distance.value);
+    return Number.isFinite(value) && value >= 0.1 && value <= 100 ? value : null;
+  }
+  function formatDistance(value) { return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(3))); }
+  function signedDistance(value) { return state.motionDirection * Math.abs(value); }
+  function updateDirectionControls() {
+    const reverse = state.motionDirection < 0;
+    els.directionPositive.classList.toggle("active", !reverse);
+    els.directionNegative.classList.toggle("active", reverse);
+    els.directionPositive.setAttribute("aria-pressed", String(!reverse));
+    els.directionNegative.setAttribute("aria-pressed", String(reverse));
+    const directionText = reverse ? "反向" : "正向";
+    const distance = configuredDistance();
+    els.directionJogBtn.textContent = `${directionText}点动 2 mm`;
+    els.directionRunBtn.textContent = distance === null ? `${directionText}运行` : `${directionText}运行 ${formatDistance(distance)} mm`;
+    els.motionCommandPreview.textContent = distance === null ? "请输入 0.1–100 mm 的有效行程" : `即将执行：JOG ${formatDistance(signedDistance(distance))}`;
+    els.motionCommandPreview.classList.toggle("reverse", reverse);
+  }
+  function setMotionDirection(direction) {
+    state.motionDirection = Number(direction) < 0 ? -1 : 1;
+    updateDirectionControls();
+  }
   function massKg() { return Math.max(0, Number(els.mass.value) || 0) / 1000; }
   function calculateMu(force) { const m = massKg(); return Number.isFinite(force) && m > 0 ? force / (m * 9.80665) : null; }
   function updateMetrics(sample) {
@@ -95,7 +119,7 @@
     if (values.pos_mm) els.position.textContent = numeric(Number(values.pos_mm));
     if (values.speed_mm_s) els.speed.textContent = numeric(Math.abs(Number(values.speed_mm_s)));
     if (values.target_mm_s) $("speedInput").value = Number(values.target_mm_s);
-    if (values.distance_mm) $("distanceInput").value = Number(values.distance_mm);
+    if (values.distance_mm) { $("distanceInput").value = Number(values.distance_mm); updateDirectionControls(); }
     if (values.accel_mm_s2) $("accelInput").value = Number(values.accel_mm_s2);
     if (values.steps_per_mm) els.stepsPerMm.textContent = `${Number(values.steps_per_mm).toFixed(1)} step/mm`;
     if (values.cal === "1") { els.calState.textContent = "已标定"; els.calState.className = "badge running"; }
@@ -118,7 +142,7 @@
     if (Number.isFinite(Number(status.pos_mm))) els.position.textContent = numeric(Number(status.pos_mm));
     if (Number.isFinite(Number(status.speed_mm_s))) els.speed.textContent = numeric(Math.abs(Number(status.speed_mm_s)));
     if (status.target_mm_s !== undefined) $("speedInput").value = Number(status.target_mm_s);
-    if (status.distance_mm !== undefined) $("distanceInput").value = Number(status.distance_mm);
+    if (status.distance_mm !== undefined) { $("distanceInput").value = Number(status.distance_mm); updateDirectionControls(); }
     if (status.accel_mm_s2 !== undefined) $("accelInput").value = Number(status.accel_mm_s2);
     if (status.steps_per_mm !== undefined) els.stepsPerMm.textContent = `${Number(status.steps_per_mm).toFixed(1)} step/mm`;
     if (status.calibrated) { els.calState.textContent = "已标定"; els.calState.className = "badge running"; }
@@ -290,7 +314,26 @@
     if (command === "HOME" && !confirm("请确认 HOME 限位开关已经安装并接线正确。继续发送 HOME 吗？")) return;
     await sendCommand(command);
   }));
-  document.querySelectorAll("[data-input]").forEach((button) => button.addEventListener("click", () => { const value = Number($(button.dataset.input).value); if (!Number.isFinite(value)) return; sendCommand(`${button.dataset.command} ${value}`); }));
+  document.querySelectorAll("[data-input]").forEach((button) => button.addEventListener("click", () => {
+    const input = $(button.dataset.input);
+    const value = Number(input.value);
+    const min = input.min === "" ? -Infinity : Number(input.min);
+    const max = input.max === "" ? Infinity : Number(input.max);
+    if (!Number.isFinite(value) || value < min || value > max) {
+      log(`${button.dataset.command} 参数必须在 ${min}–${max} 之间。`, "error");
+      input.focus();
+      return;
+    }
+    sendCommand(`${button.dataset.command} ${value}`);
+  }));
+  document.querySelectorAll("[data-motion-direction]").forEach((button) => button.addEventListener("click", () => setMotionDirection(button.dataset.motionDirection)));
+  els.directionJogBtn.addEventListener("click", () => sendCommand(`JOG ${formatDistance(signedDistance(2))}`));
+  els.directionRunBtn.addEventListener("click", () => {
+    const distance = configuredDistance();
+    if (distance === null) { log("运行行程必须在 0.1–100 mm 之间。", "error"); els.distance.focus(); return; }
+    sendCommand(`JOG ${formatDistance(signedDistance(distance))}`);
+  });
+  els.distance.addEventListener("input", updateDirectionControls);
   els.calBtn.addEventListener("click", () => { const grams = prompt("请输入已知标定质量（g），例如 200：", "200"); const value = Number(grams); if (Number.isFinite(value) && value > 0) sendCommand(`CAL ${value}`); });
   async function connectTransport() { if (state.connected) { if (state.transport === "wifi") await disconnectWifi(); else await disconnectSerial(); return; } try { if (els.connectionMode.value === "wifi") await connectWifi(); else await connectSerial(); } catch (error) { log(`连接失败：${error.message}`, "error"); setConnection(false); } }
   async function refreshDesktopPorts() {
@@ -318,5 +361,5 @@
   els.sendRawBtn.addEventListener("click", () => { const command = els.rawCommand.value.trim(); if (command) { sendCommand(command); els.rawCommand.value = ""; } });
   els.rawCommand.addEventListener("keydown", (event) => { if (event.key === "Enter") els.sendRawBtn.click(); });
   window.addEventListener("resize", drawCharts); els.mass.addEventListener("input", () => { const latest = state.samples[state.samples.length - 1]; if (latest) updateMetrics(latest); });
-  setConnection(false); setBadge("IDLE"); drawCharts(); log("控制台已就绪。请连接 ESP32，或开启模拟数据检查界面。");
+  setConnection(false); setBadge("IDLE"); updateDirectionControls(); drawCharts(); log("控制台已就绪。请连接 ESP32，或开启模拟数据检查界面。");
 })();

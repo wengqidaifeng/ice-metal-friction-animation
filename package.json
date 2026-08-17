@@ -1,6 +1,6 @@
 {
   "name": "ice-metal-friction-console",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ESP32 ice-metal friction experiment serial console",
   "main": "desktop/main.js",
   "author": "物理实验设计竞赛项目组",
@@ -16,6 +16,7 @@
   "build": {
     "appId": "cn.physicscompetition.icefriction",
     "productName": "冰金属摩擦实验控制台",
+    "npmRebuild": false,
     "directories": {
       "output": "dist"
     },
