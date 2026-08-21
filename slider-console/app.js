@@ -68,6 +68,7 @@
     updateDirectionControls();
   }
   const GRAVITY = 9.80665;
+  const HX711_SATURATION_COUNT = 8000000;
   const SENSOR_SETTINGS_KEY = "iceFriction.sensorSettings.v1";
   function unitFactor(unit = state.sensor.unit) { return unit === "gf" ? 1000 / GRAVITY : unit === "kgf" ? 1 / GRAVITY : 1; }
   function unitDigits(unit = state.sensor.unit) { return unit === "gf" ? 2 : 4; }
@@ -153,6 +154,7 @@
   function captureRawCalibrationPoint(kind) {
     const latest = state.rawSignal.latest;
     if (!latest) { log("当前没有HX711原始计数，无法记录标定点。", "error"); return; }
+    if (Math.abs(latest.rawCount) >= HX711_SATURATION_COUNT) { log("当前原始计数接近HX711量程极限，疑似断线或输入饱和，不能记录为标定点。", "error"); return; }
     if (kind === "zero") { state.rawSignal.zeroSnapshot = latest.rawCount; state.rawSignal.loadSnapshot = null; log(`已记录空载原始值 ${latest.rawCount}。`); }
     else { state.rawSignal.loadSnapshot = latest.rawCount; log(`已记录加载原始值 ${latest.rawCount}。`); }
     refreshRawCalibrationAssistant();
@@ -179,7 +181,10 @@
     const values = recent.map((entry) => entry.relativeCount);
     const peakToPeak = values.length ? Math.max(...values) - Math.min(...values) : 0;
     const stale = Number.isFinite(latest.ageMs) && latest.ageMs > 500;
-    const fixedZero = recent.length >= 5 && recent.every((entry) => entry.rawCount === 0 && entry.dout === 0);
+    const saturated = recent.some((entry) => Math.abs(entry.rawCount) >= HX711_SATURATION_COUNT);
+    const largestStep = recent.slice(1).reduce((maximum, entry, index) => Math.max(maximum, Math.abs(entry.rawCount - recent[index].rawCount)), 0);
+    const abrupt = largestStep >= 1000000;
+    const fixedZero = recent.length >= 5 && recent.every((entry) => entry.rawCount === 0);
 
     els.rawCountValue.textContent = String(latest.rawCount);
     els.rawRelativeValue.textContent = String(latest.relativeCount);
@@ -191,11 +196,17 @@
     if (stale) {
       els.rawSignalState.textContent = "数据停止更新";
       els.rawSignalState.className = "badge fault";
+    } else if (saturated) {
+      els.rawSignalState.textContent = "信号饱和 / 疑似断线";
+      els.rawSignalState.className = "badge fault";
+    } else if (abrupt) {
+      els.rawSignalState.textContent = "异常突变 / 检查接线";
+      els.rawSignalState.className = "badge fault";
     } else if (fixedZero) {
-      els.rawSignalState.textContent = "信号固定为 0";
+      els.rawSignalState.textContent = "原始值固定为 0";
       els.rawSignalState.className = "badge fault";
     } else if (peakToPeak > 0) {
-      els.rawSignalState.textContent = "检测到受力变化";
+      els.rawSignalState.textContent = "检测到原始信号变化";
       els.rawSignalState.className = "badge running";
     } else {
       els.rawSignalState.textContent = "信号在线，等待变化";
