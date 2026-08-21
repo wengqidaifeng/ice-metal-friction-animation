@@ -142,6 +142,35 @@
           </section>
         </div>
 
+        <section class="raw-signal-monitor" aria-labelledby="rawSignalTitle">
+          <div class="raw-signal-heading">
+            <div><h3 id="rawSignalTitle">HX711 原始信号监视</h3><p>无需标定，用于确认传感器、电桥和HX711是否会随受力变化</p></div>
+            <span id="rawSignalState" class="badge muted-badge">等待原始数据</span>
+          </div>
+          <div class="raw-signal-grid">
+            <div><span>当前原始计数</span><strong id="rawCountValue">--</strong><em>count</em></div>
+            <div><span>相对监视起点</span><strong id="rawRelativeValue">--</strong><em>count</em></div>
+            <div><span>相对去皮零点</span><strong id="rawDeltaValue">--</strong><em>count</em></div>
+            <div><span>2秒峰峰值</span><strong id="rawPeakToPeakValue">--</strong><em>count</em></div>
+            <div><span>数字接口</span><strong id="rawDoutValue">--</strong><em>DAT</em></div>
+            <div><span>最近更新</span><strong id="rawAgeValue">--</strong><em>ms</em></div>
+          </div>
+          <div class="raw-calibration-assistant">
+            <div class="raw-calibration-readouts">
+              <span>空载快照 <strong id="rawZeroSnapshot">--</strong></span>
+              <span>加载快照 <strong id="rawLoadSnapshot">--</strong></span>
+              <span>响应差值 <strong id="rawResponseValue">-- count</strong></span>
+              <span>预估灵敏度 <strong id="rawScalePreview">-- raw/N</strong></span>
+            </div>
+            <div class="raw-monitor-actions">
+              <button id="captureRawZeroBtn" class="button outline">记录空载点</button>
+              <button id="captureRawLoadBtn" class="button outline">记录加载点</button>
+              <button id="resetRawBaselineBtn" class="button outline">重置曲线基线</button>
+              <button id="pauseRawMonitorBtn" class="button outline">暂停原始监视</button>
+            </div>
+          </div>
+        </section>
+
         <div class="sensor-action-bar">
           <button id="captureForceBtn" class="button outline">单次抓取</button>
           <button id="freezeSensorBtn" class="button outline">冻结读数</button>
@@ -161,6 +190,7 @@
           <div><h2>实时曲线</h2><p class="subheading">50 Hz 数据流 · 橙色区域为匀速段</p></div>
           <div class="chart-actions"><label class="inline-field">窗口 <input id="windowInput" type="number" min="10" max="300" step="10" value="60"> s</label><button id="clearBtn" class="button ghost">清除曲线</button></div>
         </div>
+        <div class="chart-block"><div class="chart-label"><span>HX711 原始变化 / count</span><span id="rawSignalRange">--</span></div><canvas id="rawSignalChart"></canvas></div>
         <div class="chart-block"><div class="chart-label"><span id="forceChartLabel">拉力 F<sub>t</sub> / N</span><span id="forceRange">--</span></div><canvas id="forceChart"></canvas></div>
         <div class="chart-block"><div class="chart-label"><span>位置 / mm　速度 / mm/s</span><span id="sampleRate">0.0 Hz</span></div><canvas id="motionChart"></canvas></div>
       </section>
